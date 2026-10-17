@@ -28,6 +28,21 @@
 @media(max-width:600px){body{padding:14px 10px;padding-bottom:calc(18px + env(safe-area-inset-bottom))}main{width:100%;max-width:100%;min-width:0}h1{font-size:1.18rem;margin-bottom:18px}h2{font-size:1.08rem;margin-bottom:12px}.screen{min-height:0}.mode-buttons{grid-template-columns:1fr;gap:8px}.mode-buttons button{min-height:68px;font-size:1rem}.panel{padding:14px 0;margin:12px 0}.row{gap:8px;align-items:stretch}.row>label{display:flex;flex:1 1 100%;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}.row input,.row select{max-width:100%;min-width:0;flex:1 1 130px}.row button{min-height:44px;flex:1 1 auto}.players{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.player{min-width:0;padding:10px;font-size:.9rem;overflow-wrap:anywhere}.turn-order{gap:5px}.turn-chip{font-size:.78rem;padding:6px 7px}.turn-arrow{font-size:.8rem}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.card{width:auto;min-width:0;max-width:100%;padding:10px;font-size:.9rem;overflow-wrap:anywhere}.card button{max-width:100%}#targetWrap{width:100%;display:flex;align-items:center;gap:8px}#target{flex:1;min-width:0}.log{max-height:180px;font-size:.86rem;padding:9px;overflow-wrap:anywhere}#combatFx .fx-label{font-size:clamp(1.9rem,10vw,3.6rem);max-width:96vw;overflow-wrap:anywhere}.screen-footer{margin-top:20px}#inviteLink{min-width:0!important;width:100%}details.panel{padding-top:14px}}
 @media(max-width:360px){.players,.cards{grid-template-columns:minmax(0,1fr)}.turn-chip{font-size:.72rem}.row button{padding:10px 8px}}
 @media(prefers-reduced-motion:reduce){#combatFx.show,.player.fx-hit,.player.fx-block,.player.fx-reflect,.player.fx-heal,.player.fx-special,.player.fx-status{animation:none}#combatFx .fx-label,#combatFx .fx-rays{animation:none;opacity:1}}
+
+/* Invite-link landing page: exactly nickname input + join button */
+#onlineSetup.invite-mode #friendBack,
+#onlineSetup.invite-mode > h2,
+#onlineSetup.invite-mode > p.muted,
+#onlineSetup.invite-mode #createRoom,
+#onlineSetup.invite-mode #joinCodeLabel,
+#onlineSetup.invite-mode #joinCode,
+#onlineSetup.invite-mode #onlineError { display:none !important; }
+#onlineSetup.invite-mode #createRoomRow { display:flex !important; margin-top:18px; }
+#onlineSetup.invite-mode #createRoomRow label { width:100%; }
+#onlineSetup.invite-mode #onlineNick { width:100%; min-width:0; box-sizing:border-box; }
+#onlineSetup.invite-mode .row:has(#joinRoom) { margin-top:10px !important; }
+#onlineSetup.invite-mode .row:has(#joinRoom) label { display:none !important; }
+#onlineSetup.invite-mode #joinRoom { width:100%; min-height:44px; }
 </style></head>
 <body><div id="combatFx" aria-hidden="true"><div class="fx-rays"></div><div class="fx-label">IMPACT!</div></div><main><h1>수다떨쥬 게임 테스트</h1>
 <section class="screen" id="modeSelect"><h2>대전 방식 선택</h2><div class="mode-buttons"><button id="modeAI">AI와 대전</button><button id="modeFriend">친구 대전</button></div><div class="screen-footer"><button id="showRules" class="back">게임 규칙 보기</button></div></section>
@@ -48,7 +63,7 @@
 </div><div style="margin-top:20px"><button id="rulesBack" class="back">← 처음으로</button></div></details>
 <section class="screen hidden" id="onlineSetup"><button id="friendBack" class="back">← 처음으로</button><h2>🌐 친구와 온라인으로 플레이</h2><p class="muted">방장이 방을 만들고 링크를 공유해. 친구가 대기실에 들어오면 명단에 표시되고, 방장이 플레이를 누르면 모두의 화면에서 게임이 시작돼.</p>
 <div class="row" id="createRoomRow"><label>닉네임 <input id="onlineNick" maxlength="16" placeholder="게임에서 사용할 닉네임" autocomplete="nickname" required></label><button id="createRoom">방 만들기</button></div>
-<div class="row" style="margin-top:10px"><label>초대 코드 <input id="joinCode" maxlength="6" placeholder="6자리 코드" style="text-transform:uppercase"></label><button id="joinRoom">방 참가</button></div>
+<div class="row" style="margin-top:10px"><label id="joinCodeLabel">초대 코드 <input id="joinCode" maxlength="6" placeholder="6자리 코드" style="text-transform:uppercase"></label><button id="joinRoom">방 참가</button></div>
 <div id="connectionSetup" class="hidden" aria-hidden="true"></div>
 <div id="lobby" class="panel hidden"><h3 id="lobbyHeading">대기실</h3><p>방 코드: <b id="lobbyCode"></b></p><div class="row"><input id="inviteLink" readonly style="flex:1;min-width:220px"><button id="copyInvite">초대 링크 복사</button></div><h4>참가자 <span id="lobbyCount">0/10</span></h4><ul id="roster"></ul><p id="lobbyStatus" class="muted" aria-live="polite">친구를 기다리는 중…</p><button id="hostStart" disabled>모두 준비됐어 · 플레이</button> <button id="leaveLobby" class="back" type="button">대기실 나가기</button></div>
 <p id="onlineError" class="muted" aria-live="polite"></p></section>
@@ -150,7 +165,7 @@ let sb=null, onlineRoom=null, lobbyTimer=null, gameStartHandled=false, onlineGam
 const $o=id=>document.getElementById(id);
 function onlineMsg(t){$o('onlineError').textContent=t}
 function cfg(){try{const current=JSON.parse(localStorage.getItem(ONLINE_KEY)||'{}');if(current.url&&current.key)return current;for(const k of ['starlight-duel-supabase-config','starlight-duel-current-config','supabase-config']){const old=JSON.parse(localStorage.getItem(k)||'{}');if(old.url&&old.key){localStorage.setItem(ONLINE_KEY,JSON.stringify(old));return old}}return {}}catch{return {}}}
-function initConfig(){const q=new URLSearchParams(location.search);let c=cfg();if(q.get('sburl')&&q.get('sbkey')&&!/secret|service_role/i.test(q.get('sbkey'))){c={url:q.get('sburl'),key:q.get('sbkey')};localStorage.setItem(ONLINE_KEY,JSON.stringify(c))}if(q.get('room')){$o('joinCode').value=q.get('room');$o('createRoomRow').classList.add('hidden');$o('onlineNick').value='';onlineMsg('초대 링크로 들어왔어! 닉네임을 입력하고 ‘방 참가’를 눌러 줘.');showScreen('onlineSetup');$o('onlineNick').focus()}}
+function initConfig(){const q=new URLSearchParams(location.search);let c=cfg();if(q.get('sburl')&&q.get('sbkey')&&!/secret|service_role/i.test(q.get('sbkey'))){c={url:q.get('sburl'),key:q.get('sbkey')};localStorage.setItem(ONLINE_KEY,JSON.stringify(c))}if(q.get('room')){$o('onlineSetup').classList.add('invite-mode');$o('joinCode').value=q.get('room');$o('createRoomRow').classList.remove('hidden');$o('createRoom').classList.add('hidden');$o('joinRoom').textContent='방 참가';$o('onlineNick').value='';$o('lobby').classList.add('hidden');onlineMsg('');showScreen('onlineSetup');$o('onlineNick').focus()}}
 function connect(){const c=cfg();if(!c.url||!c.key||!window.supabase?.createClient)throw Error('저장된 온라인 연결 정보를 찾지 못했어. 기존에 연결했던 사이트에서 열거나, 친구 초대 링크로 접속해 줘.');sb=window.supabase.createClient(c.url,c.key);return sb}
 function token(){return crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36)}
 async function removeOnlinePresence(keepalive=false){
@@ -234,12 +249,12 @@ function renderSharedOrLocal(){if(!players.length)return;if(gameOver){finish();r
 
 
 $o('createRoom').addEventListener('click',createOnlineRoom);$o('joinRoom').addEventListener('click',()=>joinOnlineRoom($o('joinCode').value));
-$o('leaveLobby').addEventListener('click',async()=>{try{await removeOnlinePresence(false);$o('lobby').classList.add('hidden');$o('createRoomRow').classList.remove('hidden');showScreen('modeSelect');onlineMsg('대기실에서 나왔어.');}catch(e){onlineMsg('대기실에서 나가지 못했어: '+e.message+' (Supabase DELETE 권한을 확인해 줘.)')}});
+$o('leaveLobby').addEventListener('click',async()=>{try{await removeOnlinePresence(false);$o('lobby').classList.add('hidden');$o('onlineSetup').classList.remove('invite-mode');$o('createRoomRow').classList.remove('hidden');$o('createRoom').classList.remove('hidden');$o('joinCodeLabel').style.display='';showScreen('modeSelect');onlineMsg('대기실에서 나왔어.');}catch(e){onlineMsg('대기실에서 나가지 못했어: '+e.message+' (Supabase DELETE 권한을 확인해 줘.)')}});
 window.addEventListener('pagehide',()=>{removeOnlinePresence(true)});$o('copyInvite').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($o('inviteLink').value);$o('lobbyStatus').textContent='초대 링크를 복사했어!'}catch{$o('lobbyStatus').textContent='링크를 선택해서 복사해 줘.'}});
 $o('hostStart').addEventListener('click',async()=>{try{if(!onlineRoom||onlineRoom.role!=='host')return;const [r,p]=await Promise.all([sb.from('duel_rooms').select('id,game_state').eq('id',onlineRoom.id).single(),sb.from('duel_multi_players').select('player_id,nick,avatar,role,player_state').eq('room_id',onlineRoom.id)]);if(r.error)throw r.error;if(p.error)throw p.error;if((p.data||[]).length<2)throw Error('친구가 최소 한 명 들어와야 시작할 수 있어.');const next={...(r.data.game_state||{}),lobby:{started:true,startAt:Date.now(),seed:Math.floor(Math.random()*2147483646)+1,players:(p.data||[]).map(x=>({id:x.player_id,nick:x.nick}))}};const up=await sb.from('duel_rooms').update({game_state:next,status:'playing'}).eq('id',onlineRoom.id).select('id').maybeSingle();if(up.error)throw up.error;if(!up.data)throw Error('시작 신호 저장 권한이 없어. Supabase RLS 정책을 확인해 줘.');await pollLobby()}catch(e){onlineMsg('시작 실패: '+e.message)}});
 function showScreen(id){['modeSelect','rules','setup','onlineSetup','game'].forEach(k=>{const el=$o(k);if(!el)return;if(k==='rules'){if(id==='rules'){el.classList.remove('hidden');el.open=true}else{el.classList.add('hidden');el.open=false}}else el.classList.toggle('hidden',k!==id)});window.scrollTo(0,0)}
 $o('modeAI').addEventListener('click',()=>{aiMode=true;showScreen('setup')});
-$o('modeFriend').addEventListener('click',()=>{aiMode=false;showScreen('onlineSetup');$o('createRoomRow').classList.toggle('hidden',!!new URLSearchParams(location.search).get('room'));if(!cfg().url||!cfg().key)onlineMsg('저장된 온라인 연결 정보가 없어. 기존에 연결한 사이트나 친구 초대 링크로 접속해 줘.')});
+$o('modeFriend').addEventListener('click',()=>{aiMode=false;const invited=!!new URLSearchParams(location.search).get('room');$o('onlineSetup').classList.toggle('invite-mode',invited);showScreen('onlineSetup');$o('createRoomRow').classList.remove('hidden');$o('createRoom').classList.toggle('hidden',invited);$o('joinRoom').textContent='방 참가';if(!invited)$o('joinCodeLabel').style.display='';if(!cfg().url||!cfg().key)onlineMsg('저장된 온라인 연결 정보가 없어. 기존에 연결한 사이트나 친구 초대 링크로 접속해 줘.')});
 $o('showRules').addEventListener('click',()=>showScreen('rules'));
 $o('rulesBack').addEventListener('click',()=>showScreen('modeSelect'));
 $o('friendBack').addEventListener('click',async()=>{try{await removeOnlinePresence(false)}catch(e){onlineMsg('대기실 나가기 오류: '+e.message)}$o('lobby').classList.add('hidden');$o('createRoomRow').classList.remove('hidden');showScreen('modeSelect')});
