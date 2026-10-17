@@ -30,14 +30,15 @@
 @media(prefers-reduced-motion:reduce){#combatFx.show,.player.fx-hit,.player.fx-block,.player.fx-reflect,.player.fx-heal,.player.fx-special,.player.fx-status{animation:none}#combatFx .fx-label,#combatFx .fx-rays{animation:none;opacity:1}}
 
 /* Invite-link landing page: exactly nickname input + join button */
-#onlineSetup.invite-mode #friendBack,
 #onlineSetup.invite-mode > h2,
 #onlineSetup.invite-mode > p.muted,
 #onlineSetup.invite-mode #createRoom,
 #onlineSetup.invite-mode #joinCodeLabel,
 #onlineSetup.invite-mode #joinCode,
 #onlineSetup.invite-mode #onlineError { display:none !important; }
+#onlineSetup.invite-mode #friendBack { display:inline-block !important; }
 #onlineSetup.invite-mode #createRoomRow { display:flex !important; margin-top:18px; }
+#onlineSetup.invite-mode #createRoomRow #createRoom { display:none !important; }
 #onlineSetup.invite-mode #createRoomRow label { width:100%; }
 #onlineSetup.invite-mode #onlineNick { width:100%; min-width:0; box-sizing:border-box; }
 #onlineSetup.invite-mode .row:has(#joinRoom) { margin-top:10px !important; }
@@ -250,7 +251,7 @@ function renderSharedOrLocal(){if(!players.length)return;if(gameOver){finish();r
 
 $o('createRoom').addEventListener('click',createOnlineRoom);$o('joinRoom').addEventListener('click',()=>joinOnlineRoom($o('joinCode').value));
 $o('leaveLobby').addEventListener('click',async()=>{try{await removeOnlinePresence(false);$o('lobby').classList.add('hidden');$o('onlineSetup').classList.remove('invite-mode');$o('createRoomRow').classList.remove('hidden');$o('createRoom').classList.remove('hidden');$o('joinCodeLabel').style.display='';showScreen('modeSelect');onlineMsg('대기실에서 나왔어.');}catch(e){onlineMsg('대기실에서 나가지 못했어: '+e.message+' (Supabase DELETE 권한을 확인해 줘.)')}});
-window.addEventListener('pagehide',()=>{removeOnlinePresence(true)});$o('copyInvite').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($o('inviteLink').value);$o('lobbyStatus').textContent='초대 링크를 복사했어!'}catch{$o('lobbyStatus').textContent='링크를 선택해서 복사해 줘.'}});
+window.addEventListener('pagehide',()=>{removeOnlinePresence(true)});window.addEventListener('beforeunload',()=>{removeOnlinePresence(true)});$o('copyInvite').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($o('inviteLink').value);$o('lobbyStatus').textContent='초대 링크를 복사했어!'}catch{$o('lobbyStatus').textContent='링크를 선택해서 복사해 줘.'}});
 $o('hostStart').addEventListener('click',async()=>{try{if(!onlineRoom||onlineRoom.role!=='host')return;const [r,p]=await Promise.all([sb.from('duel_rooms').select('id,game_state').eq('id',onlineRoom.id).single(),sb.from('duel_multi_players').select('player_id,nick,avatar,role,player_state').eq('room_id',onlineRoom.id)]);if(r.error)throw r.error;if(p.error)throw p.error;if((p.data||[]).length<2)throw Error('친구가 최소 한 명 들어와야 시작할 수 있어.');const next={...(r.data.game_state||{}),lobby:{started:true,startAt:Date.now(),seed:Math.floor(Math.random()*2147483646)+1,players:(p.data||[]).map(x=>({id:x.player_id,nick:x.nick}))}};const up=await sb.from('duel_rooms').update({game_state:next,status:'playing'}).eq('id',onlineRoom.id).select('id').maybeSingle();if(up.error)throw up.error;if(!up.data)throw Error('시작 신호 저장 권한이 없어. Supabase RLS 정책을 확인해 줘.');await pollLobby()}catch(e){onlineMsg('시작 실패: '+e.message)}});
 function showScreen(id){['modeSelect','rules','setup','onlineSetup','game'].forEach(k=>{const el=$o(k);if(!el)return;if(k==='rules'){if(id==='rules'){el.classList.remove('hidden');el.open=true}else{el.classList.add('hidden');el.open=false}}else el.classList.toggle('hidden',k!==id)});window.scrollTo(0,0)}
 $o('modeAI').addEventListener('click',()=>{aiMode=true;showScreen('setup')});
