@@ -23,9 +23,9 @@
 <ul><li><b class="common">일반:</b> 공격 1~10, 방어 5, 회복 10, 회복 20, 최대 체력 +20</li><li><b class="rare">고급:</b> 강력한 공격 20, 독, 화상, 상태효과 회복 포션, 카드 훔치기</li><li><b class="epic">최고급:</b> 천사, 반사, 체력 교환, 자동 부활, 동귀어진</li></ul>
 <p><b>참고:</b> 현재 버전은 한 기기에서 플레이하는 로컬 테스트입니다. 온라인 멀티플레이와 재접속 기능은 아직 연결되지 않았습니다.</p>
 </div><div style="margin-top:20px"><button id="rulesBack" class="back">← 처음으로</button></div></details>
-<section class="screen hidden" id="onlineSetup"><button id="friendBack" class="back">← 처음으로</button><h2>🌐 친구와 온라인으로 플레이</h2><p class="muted">방장이 방을 만들고 링크를 공유해. 친구가 대기실에 들어오면 명단에 표시되고, 방장이 플레이를 누르면 모두의 화면에서 게임이 시작돼.</p>
-<div class="row"><label>닉네임 <input id="onlineNick" maxlength="16" placeholder="닉네임"></label><button id="createRoom">방 만들기</button></div>
-<div class="row" style="margin-top:10px"><label>초대 코드 <input id="joinCode" maxlength="6" placeholder="6자리 코드" style="text-transform:uppercase"></label><button id="joinRoom">방 참가</button></div>
+<section class="screen hidden" id="onlineSetup"><button id="friendBack" class="back">← 처음으로</button><h2 id="onlineTitle">🌐 친구와 온라인으로 플레이</h2><p id="onlineDescription" class="muted">방장이 방을 만들고 링크를 공유해. 친구가 대기실에 들어오면 명단에 표시되고, 방장이 플레이를 누르면 모두의 화면에서 게임이 시작돼.</p>
+<div class="row" id="nicknameRow"><label>닉네임 <input id="onlineNick" maxlength="16" placeholder="닉네임"></label><button id="setNickname">닉네임 설정</button><button id="createRoom">방 만들기</button></div>
+<div class="row" id="joinRow" style="margin-top:10px"><label id="joinCodeLabel">초대 코드 <input id="joinCode" maxlength="6" placeholder="6자리 코드" style="text-transform:uppercase"></label><button id="joinRoom">방 참가</button></div>
 <div id="connectionSetup" class="hidden" aria-hidden="true"></div>
 <div id="lobby" class="panel hidden"><h3 id="lobbyHeading">대기실</h3><p>방 코드: <b id="lobbyCode"></b></p><div class="row"><input id="inviteLink" readonly style="flex:1;min-width:220px"><button id="copyInvite">초대 링크 복사</button></div><h4>참가자 <span id="lobbyCount">0/10</span></h4><ul id="roster"></ul><p id="lobbyStatus" class="muted" aria-live="polite">친구를 기다리는 중…</p><button id="hostStart" disabled>모두 준비됐어 · 플레이</button></div>
 <p id="onlineError" class="muted" aria-live="polite"></p></section>
@@ -34,7 +34,7 @@
 <div class="panel"><h3 id="phaseTitle">행동</h3><p id="instruction"></p><div class="cards" id="hand"></div><div class="row" style="margin-top:12px"><label id="targetWrap">대상 <select id="target"></select></label><button id="submit">선택 완료</button><button id="pass" class="hidden">응답하지 않기</button></div></div>
 <div class="panel"><h3>전투 기록</h3><div id="log" class="log"></div></div></section>
 </main>
-<div class="version-badge" aria-label="버전 0.0.2">v0.0.2</div>
+<div class="version-badge" aria-label="버전 0.0.3">v0.0.3</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const CARD_DEFS=[
@@ -125,7 +125,8 @@ async function showLobby(){showScreen('onlineSetup');$o('onlineSetup').querySele
 async function pollLobby(){if(!onlineRoom||!sb)return;const [r,p]=await Promise.all([sb.from('duel_rooms').select('id,status,game_state').eq('id',onlineRoom.id).single(),sb.from('duel_multi_players').select('player_id,nick,avatar,role,player_state').eq('room_id',onlineRoom.id).order('created_at',{ascending:true})]);if(r.error)throw r.error;if(p.error)throw p.error;const players=p.data||[];$o('lobbyCount').textContent=players.length+'/10';$o('roster').innerHTML=players.map((x,i)=>'<li>'+((x.avatar||'🎮')+' '+String(x.nick).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))+(x.player_id===onlineRoom.pid?' (나)':'')+(x.role==='host'?' · 방장':''))+'</li>').join('');const started=!!r.data.game_state?.lobby?.started;$o('hostStart').disabled=onlineRoom.role!=='host'||players.length<2||started;$o('hostStart').textContent=started?'게임 시작됨':'모두 준비됐어 · 플레이';$o('lobbyStatus').textContent=started?'방장이 시작했어! 모든 참가자의 게임 화면을 여는 중…':players.length<2?'친구를 기다리는 중… ('+players.length+'/10)':'참가자 '+players.length+'명 접속 · 방장이 플레이를 누르면 시작해!';if(started&&!gameStartHandled){gameStartHandled=true;clearInterval(lobbyTimer);await startSynchronizedGame(r.data.game_state.lobby,players)}}
 async function startSynchronizedGame(lobby,rows){const n=rows.length;roundDamage={};const names=rows.map(x=>x.nick||'플레이어');const sharedSeed=Number(lobby.seed||1);Math.seedrandom=undefined;players=rows.map((x,i)=>({id:i,name:names[i],hp:30,maxHp:30,hand:[],alive:true,status:[],permanentDefense:0}));order=Array.from({length:n},(_,i)=>i);for(let i=n-1;i>0;i--){const j=(sharedSeed*(i+3)+i*17)%(i+1);[order[i],order[j]]=[order[j],order[i]]}turn=0;logLines=[];seen={};pendingAttacks=[];gameOver=false;phase='attack';attacker=null;target=null;selected=[];showScreen('game');players.forEach(p=>draw(p,5));log('온라인 게임 시작! 참가자 '+n+'명');log('턴 순서: '+order.map(i=>players[i].name).join(' → '));beginTurn();onlineMsg('대기실에서 시작 신호를 받았어. (현재 전투 행동 동기화는 별도 구현이 필요해.)')}
 
-$o('createRoom').addEventListener('click',createOnlineRoom);$o('joinRoom').addEventListener('click',()=>joinOnlineRoom($o('joinCode').value));$o('copyInvite').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($o('inviteLink').value);$o('lobbyStatus').textContent='초대 링크를 복사했어!'}catch{$o('lobbyStatus').textContent='링크를 선택해서 복사해 줘.'}});
+$o('setNickname').addEventListener('click',()=>{const n=$o('onlineNick').value.trim().slice(0,16);if(!n){onlineMsg('닉네임을 입력해 줘.');$o('onlineNick').focus();return}sessionStorage.setItem('sudatteolzhu-nick',n);$o('onlineNick').value=n;$o('setNickname').textContent='닉네임 설정 완료';$o('joinRoom').disabled=false;onlineMsg('닉네임을 설정했어! 이제 방 참가를 눌러 줘.')});
+$o('createRoom').addEventListener('click',createOnlineRoom);$o('joinRoom').addEventListener('click',()=>{const n=$o('onlineNick').value.trim().slice(0,16);if(new URLSearchParams(location.search).get('room')&&sessionStorage.getItem('sudatteolzhu-nick')!==n){onlineMsg('먼저 닉네임 설정을 눌러 줘.');return}joinOnlineRoom($o('joinCode').value)});$o('copyInvite').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($o('inviteLink').value);$o('lobbyStatus').textContent='초대 링크를 복사했어!'}catch{$o('lobbyStatus').textContent='링크를 선택해서 복사해 줘.'}});
 $o('hostStart').addEventListener('click',async()=>{try{if(!onlineRoom||onlineRoom.role!=='host')return;const [r,p]=await Promise.all([sb.from('duel_rooms').select('id,game_state').eq('id',onlineRoom.id).single(),sb.from('duel_multi_players').select('player_id,nick,avatar,role,player_state').eq('room_id',onlineRoom.id)]);if(r.error)throw r.error;if(p.error)throw p.error;if((p.data||[]).length<2)throw Error('친구가 최소 한 명 들어와야 시작할 수 있어.');const next={...(r.data.game_state||{}),lobby:{started:true,startAt:Date.now(),seed:Math.floor(Math.random()*2147483646)+1,players:(p.data||[]).map(x=>({id:x.player_id,nick:x.nick}))}};const up=await sb.from('duel_rooms').update({game_state:next,status:'playing'}).eq('id',onlineRoom.id).select('id').maybeSingle();if(up.error)throw up.error;if(!up.data)throw Error('시작 신호 저장 권한이 없어. Supabase RLS 정책을 확인해 줘.');await pollLobby()}catch(e){onlineMsg('시작 실패: '+e.message)}});
 function showScreen(id){['modeSelect','rules','setup','onlineSetup','game'].forEach(k=>{const el=$o(k);if(!el)return;if(k==='rules'){if(id==='rules'){el.classList.remove('hidden');el.open=true}else{el.classList.add('hidden');el.open=false}}else el.classList.toggle('hidden',k!==id)});window.scrollTo(0,0)}
 $o('modeAI').addEventListener('click',()=>showScreen('setup'));
@@ -136,7 +137,19 @@ $o('friendBack').addEventListener('click',()=>{if(lobbyTimer)clearInterval(lobby
 $o('aiBack').addEventListener('click',()=>showScreen('modeSelect'));
 $o('gameBack').addEventListener('click',()=>{clearInterval(timer);showScreen('modeSelect')});
 initConfig();
-// Invite URLs open the friend screen with the room code prefilled. The player must enter a nickname and press '방 참가' to join.
-if(new URLSearchParams(location.search).get('room'))showScreen('onlineSetup');
+// Fixed invite-link screen: nickname setup, join room, and return home only. Joining is always manual.
+const inviteRoomCode=new URLSearchParams(location.search).get('room');
+if(inviteRoomCode){
+  showScreen('onlineSetup');
+  $o('onlineTitle').textContent='친구 초대';
+  $o('onlineDescription').textContent='닉네임을 설정한 다음, 방 참가를 눌러 줘.';
+  $o('createRoom').classList.add('hidden');
+  $o('joinCodeLabel').classList.add('hidden');
+  $o('joinCode').value=inviteRoomCode;
+  $o('friendBack').textContent='처음으로';
+  $o('joinRoom').disabled=true;
+  const savedNick=sessionStorage.getItem('sudatteolzhu-nick')||'';
+  if(savedNick)$o('onlineNick').value=savedNick;
+}
 
 </script></body></html>
