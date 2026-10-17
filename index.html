@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#100d22">
-<title>별빛 결투 — V2</title>
+<title>별빛 결투 — 멀티플레이 연결 준비</title>
 <style>
 :root{color-scheme:dark;--bg:#100d22;--panel:#1b1733;--panel2:#282044;--line:#51436f;--text:#faf6ff;--muted:#b9aed5;--pink:#ff91ce;--blue:#8acfff;--gold:#ffdf94;--mint:#9df2d5;--danger:#ff8297}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#49316b 0,#201936 35%,var(--bg) 78%);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif}
@@ -135,5 +135,97 @@ function testEvent(){if(busy||state.over)return;const beforeP=state.player.hp,be
 function showResult(o){$("resulticon").textContent=o==="win"?"🏆":o==="lose"?"🌧️":"🤝";$("resulttitle").textContent=o==="win"?"이쥬의 승리!":o==="lose"?"미라의 승리":"무승부";$("resulttext").textContent=o==="win"?"미라의 체력이 0이 됐어! 별빛 결투의 승자는 이쥬야.":o==="lose"?"이쥬의 체력이 0이 됐어. 덱을 바꿔 다시 도전해 보자!":"두 전사가 동시에 쓰러졌어. 이번 결투는 무승부야.";$("overlay").classList.add("show")}
 $("playBtn").addEventListener("click",play);$("eventtest").addEventListener("click",testEvent);$("clearBtn").addEventListener("click",()=>{selected=null;$("toast").textContent="선택을 해제했어.";render()});$("resetBtn").addEventListener("click",newGame);$("againBtn").addEventListener("click",newGame);$("rulesBtn").addEventListener("click",()=>{$("rules").open=!$("rules").open;$("rules").scrollIntoView({behavior:"smooth",block:"center"})});newGame();
 </script>
+
+<style>
+#mpSetupLauncher{position:fixed;right:14px;bottom:14px;z-index:9999;background:#ff91ce;color:#24122e;border:0;border-radius:999px;padding:12px 16px;font-weight:800;box-shadow:0 8px 24px #0007}
+#mpSetupOverlay{position:fixed;inset:0;z-index:10000;background:#090613dd;display:none;align-items:center;justify-content:center;padding:16px}
+#mpSetupCard{width:min(520px,100%);max-height:90vh;overflow:auto;background:#1b1733;border:1px solid #665285;border-radius:20px;padding:20px;box-shadow:0 20px 70px #0009}
+#mpSetupCard h2{margin:0 0 8px;font-size:1.35rem}
+#mpSetupCard p{color:#c9bddf;line-height:1.5}
+#mpSetupCard label{display:block;margin:14px 0 6px;font-weight:700}
+#mpSetupCard input{width:100%;padding:12px;border-radius:10px;border:1px solid #665285;background:#100d22;color:#fff}
+#mpSetupCard .mpBtn{border:0;border-radius:10px;padding:11px 14px;font-weight:800;margin:10px 6px 0 0;background:#ff91ce;color:#24122e}
+#mpSetupCard .mpSecondary{background:#34294d;color:#fff;border:1px solid #665285}
+#mpSetupStatus{padding:12px;border-radius:10px;background:#100d22;margin-top:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+#mpSetupCard .mpNote{font-size:.9rem;color:#b9aed5}
+</style>
+<button id="mpSetupLauncher" type="button">✨ 멀티플레이 연결 설정</button>
+<div id="mpSetupOverlay" role="dialog" aria-modal="true" aria-labelledby="mpSetupTitle">
+  <div id="mpSetupCard">
+    <h2 id="mpSetupTitle">별빛 결투 · 연결 설정</h2>
+    <p>Supabase 연결 정보를 이 브라우저에만 저장하고 연결을 테스트해요. 이 단계는 연결 확인용이며, 아직 실제 카드 대전 동기화가 완성된 것은 아니에요.</p>
+    <label for="mpProjectUrl">Project URL</label>
+    <input id="mpProjectUrl" type="url" placeholder="https://xxxxxxxx.supabase.co" autocomplete="url">
+    <label for="mpPublishableKey">Publishable key (또는 anon 공개용 키)</label>
+    <input id="mpPublishableKey" type="password" placeholder="sb_publishable_..." autocomplete="off">
+    <p class="mpNote">공개용 키만 입력해 주세요. service_role 또는 secret 키는 절대 입력하지 마세요.</p>
+    <button class="mpBtn" id="mpSaveTest" type="button">저장하고 연결 테스트</button>
+    <button class="mpBtn mpSecondary" id="mpCloseSetup" type="button">닫기</button>
+    <div id="mpSetupStatus" aria-live="polite">아직 연결을 테스트하지 않았어요.</div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  const overlay = document.getElementById('mpSetupOverlay');
+  const urlInput = document.getElementById('mpProjectUrl');
+  const keyInput = document.getElementById('mpPublishableKey');
+  const status = document.getElementById('mpSetupStatus');
+  const openBtn = document.getElementById('mpSetupLauncher');
+  const closeBtn = document.getElementById('mpCloseSetup');
+  const saveBtn = document.getElementById('mpSaveTest');
+  const STORAGE_KEY = 'starlight-duel-supabase-config';
+  const show = () => { overlay.style.display = 'flex'; };
+  const hide = () => { overlay.style.display = 'none'; };
+  openBtn.addEventListener('click', show);
+  closeBtn.addEventListener('click', hide);
+  overlay.addEventListener('click', e => { if (e.target === overlay) hide(); });
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (saved.url) urlInput.value = saved.url;
+    if (saved.key) keyInput.value = saved.key;
+  } catch (_) {}
+  const say = (msg) => { status.textContent = msg; };
+  saveBtn.addEventListener('click', async () => {
+    const url = urlInput.value.trim().replace(/\/+$/, '');
+    const key = keyInput.value.trim();
+    if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)) {
+      say('Project URL 형식을 확인해 주세요. https://프로젝트ID.supabase.co 형태여야 해요.');
+      return;
+    }
+    if (!key || /service_role|secret/i.test(key)) {
+      say('Publishable key 또는 anon 공개용 키를 입력해 주세요. secret/service_role 키는 사용할 수 없어요.');
+      return;
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({url, key}));
+    } catch (_) {
+      say('이 브라우저에 설정을 저장하지 못했어요. 브라우저의 사이트 데이터 설정을 확인해 주세요.');
+      return;
+    }
+    if (!window.supabase || !window.supabase.createClient) {
+      say('Supabase 연결 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인한 뒤 새로고침해 주세요.');
+      return;
+    }
+    saveBtn.disabled = true;
+    say('연결 확인 중…');
+    try {
+      const client = window.supabase.createClient(url, key);
+      const { error } = await client.from('duel_rooms').select('id').limit(1);
+      if (error) {
+        say('서버 주소와 키는 입력했지만 테이블 확인에 실패했어요.\\n' +
+          '오류: ' + error.message + '\\n\\nSQL Editor에서 supabase_setup.sql 실행이 성공했는지, URL과 키가 맞는지 확인해 주세요.');
+      } else {
+        say('연결 성공! ✨\\nSupabase에 연결했고 duel_rooms 테이블을 읽을 수 있어요.\\n\\n다음 단계에서 방 만들기/초대 링크 기능과 실제 카드 상태 동기화를 추가할 수 있어요.');
+      }
+    } catch (err) {
+      say('연결 중 문제가 생겼어요: ' + (err && err.message ? err.message : String(err)));
+    } finally {
+      saveBtn.disabled = false;
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
