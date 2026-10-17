@@ -162,6 +162,14 @@ $("playBtn").addEventListener("click",play);$("eventtest").addEventListener("cli
     <button class="mpBtn" id="mpSaveTest" type="button">저장하고 연결 테스트</button>
     <button class="mpBtn mpSecondary" id="mpCloseSetup" type="button">닫기</button>
     <div id="mpSetupStatus" aria-live="polite">아직 연결을 테스트하지 않았어요.</div>
+    <hr style="border-color:#514267;margin:18px 0">
+    <h3 style="margin:0 0 8px">친구와 방 만들기</h3>
+    <p class="mpNote">먼저 위에서 연결 테스트를 성공시킨 뒤 사용해 주세요. 지금 단계에서는 방 생성과 초대 코드 입장까지 확인할 수 있어요. 실제 카드 전투 동기화는 다음 단계예요.</p>
+    <button class="mpBtn" id="mpCreateRoom" type="button">🌟 새 대전방 만들기</button>
+    <label for="mpRoomCode">친구에게 받은 초대 코드</label>
+    <input id="mpRoomCode" type="text" placeholder="예: A7K9Q2" autocomplete="off" maxlength="8" style="text-transform:uppercase">
+    <button class="mpBtn mpSecondary" id="mpJoinRoom" type="button">🚪 코드로 입장</button>
+    <div id="mpRoomStatus" aria-live="polite" style="padding:12px;border-radius:10px;background:#100d22;margin-top:12px;white-space:pre-wrap;overflow-wrap:anywhere">아직 방이 없어요.</div>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -216,7 +224,7 @@ $("playBtn").addEventListener("click",play);$("eventtest").addEventListener("cli
         say('서버 주소와 키는 입력했지만 테이블 확인에 실패했어요.\\n' +
           '오류: ' + error.message + '\\n\\nSQL Editor에서 supabase_setup.sql 실행이 성공했는지, URL과 키가 맞는지 확인해 주세요.');
       } else {
-        say('연결 성공! ✨\\nSupabase에 연결했고 duel_rooms 테이블을 읽을 수 있어요.\\n\\n다음 단계에서 방 만들기/초대 링크 기능과 실제 카드 상태 동기화를 추가할 수 있어요.');
+        say('연결 성공! ✨\\nSupabase에 연결했고 duel_rooms 테이블을 읽을 수 있어요.\\n아래에서 방 만들기와 초대 코드 입장을 테스트할 수 있어요.');
       }
     } catch (err) {
       say('연결 중 문제가 생겼어요: ' + (err && err.message ? err.message : String(err)));
@@ -224,6 +232,143 @@ $("playBtn").addEventListener("click",play);$("eventtest").addEventListener("cli
       saveBtn.disabled = false;
     }
   });
+
+  const roomStatus = document.getElementById('mpRoomStatus');
+  const roomCodeInput = document.getElementById('mpRoomCode');
+  const createRoomBtn = document.getElementById('mpCreateRoom');
+  const joinRoomBtn = document.getElementById('mpJoinRoom');
+  const roomStorageKey = 'starlight-duel-current-room';
+  let roomBusy = false;
+
+  function getClient() {
+    const cfg = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (!cfg.url || !cfg.key || !window.supabase?.createClient) return null;
+    return window.supabase.createClient(cfg.url, cfg.key);
+  }
+  function randomToken(bytes = 24) {
+    const data = new Uint8Array(bytes);
+    crypto.getRandomValues(data);
+    return Array.from(data, x => x.toString(16).padStart(2, '0')).join('');
+  }
+  function randomCode() {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const data = new Uint8Array(6);
+    crypto.getRandomValues(data);
+    return Array.from(data, x => alphabet[x % alphabet.length]).join('');
+  }
+  function setRoomBusy(busy, message) {
+    roomBusy = busy;
+    createRoomBtn.disabled = busy;
+    joinRoomBtn.disabled = busy;
+    if (message) roomStatus.textContent = message;
+  }
+  function saveCurrentRoom(room) {
+    localStorage.setItem(roomStorageKey, JSON.stringify(room));
+  }
+  function makeInviteLink(code) {
+    const url = new URL(location.href);
+    url.searchParams.set('room', code);
+    return url.toString();
+  }
+  async function createRoom() {
+    if (roomBusy) return;
+    const client = getClient();
+    if (!client) {
+      roomStatus.textContent = '먼저 Project URL과 Publishable/anon 공개용 키를 입력하고 연결 테스트를 성공시켜 주세요.';
+      return;
+    }
+    setRoomBusy(true, '방을 만들고 있어요…');
+    try {
+      let result, code;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        code = randomCode();
+        const hostToken = randomToken();
+        result = await client.from('duel_rooms').insert({
+          room_code: code,
+          host_token: hostToken,
+          status: 'waiting',
+          game_state: {}
+        }).select('id, room_code, status').single();
+        if (!result.error) {
+          const currentRoom = { id: result.data.id, code: result.data.room_code, role: 'host', token: hostToken };
+          saveCurrentRoom(currentRoom);
+          roomCodeInput.value = code;
+          const invite = makeInviteLink(code);
+          roomStatus.textContent = '방을 만들었어요! ✨\n\n초대 코드: ' + code + '\n친구 초대 링크:\n' + invite + '\n\n링크를 복사해서 친구에게 보내 주세요. 친구가 입장하면 방 상태를 확인할 수 있어요.';
+          const copyBtn = document.createElement('button');
+          copyBtn.type = 'button';
+          copyBtn.className = 'mpBtn mpSecondary';
+          copyBtn.textContent = '📋 초대 링크 복사';
+          copyBtn.style.display = 'block';
+          copyBtn.addEventListener('click', async () => {
+            try { await navigator.clipboard.writeText(invite); roomStatus.textContent = '초대 링크를 복사했어요! 💗\n' + invite; }
+            catch (_) { roomStatus.textContent = '자동 복사가 안 됐어요. 아래 링크를 길게 눌러 복사해 주세요.\n' + invite; }
+          });
+          roomStatus.appendChild(document.createElement('br'));
+          roomStatus.appendChild(copyBtn);
+          return;
+        }
+        if (!String(result.error.message || '').toLowerCase().includes('duplicate')) break;
+      }
+      throw new Error(result?.error?.message || '방 생성에 실패했어요.');
+    } catch (err) {
+      roomStatus.textContent = '방 생성 실패: ' + (err?.message || String(err)) + '\nSQL 테이블과 RLS 정책을 확인해 주세요.';
+    } finally {
+      setRoomBusy(false);
+    }
+  }
+  async function joinRoom(codeFromUrl) {
+    if (roomBusy) return;
+    const code = String(codeFromUrl || roomCodeInput.value).trim().toUpperCase();
+    if (!/^[A-HJ-NP-Z2-9]{6}$/.test(code)) {
+      roomStatus.textContent = '초대 코드는 영문 대문자/숫자 6자리예요. 코드를 다시 확인해 주세요.';
+      return;
+    }
+    const client = getClient();
+    if (!client) {
+      roomStatus.textContent = '먼저 Project URL과 Publishable/anon 공개용 키를 입력하고 연결 테스트를 성공시켜 주세요.';
+      return;
+    }
+    setRoomBusy(true, '초대 코드를 확인하고 있어요…');
+    try {
+      const found = await client.from('duel_rooms').select('id, room_code, status, guest_token').eq('room_code', code).maybeSingle();
+      if (found.error) throw found.error;
+      if (!found.data) {
+        roomStatus.textContent = '이 초대 코드를 찾을 수 없어요. 친구에게 코드를 다시 확인해 달라고 해 주세요.';
+        return;
+      }
+      if (found.data.status !== 'waiting' || found.data.guest_token) {
+        const saved = JSON.parse(localStorage.getItem(roomStorageKey) || '{}');
+        if (saved.id === found.data.id && saved.role === 'guest') {
+          roomStatus.textContent = '이미 이 방에 입장한 상태예요. ✨\n초대 코드: ' + code + '\n(실제 전투 동기화는 다음 단계에서 연결할게요.)';
+          return;
+        }
+        roomStatus.textContent = '이 방은 이미 시작했거나 두 번째 자리가 찼어요. 새 초대 코드를 받아 주세요.';
+        return;
+      }
+      const guestToken = randomToken();
+      const update = await client.from('duel_rooms').update({ guest_token: guestToken, status: 'playing' }).eq('id', found.data.id).eq('status', 'waiting').is('guest_token', null).select('id, room_code').maybeSingle();
+      if (update.error) throw update.error;
+      if (!update.data) {
+        roomStatus.textContent = '방에 다른 친구가 먼저 입장했어요. 새 초대 코드를 받아 주세요.';
+        return;
+      }
+      saveCurrentRoom({ id: update.data.id, code: update.data.room_code, role: 'guest', token: guestToken });
+      roomCodeInput.value = code;
+      roomStatus.textContent = '입장 성공! 🚪✨\n초대 코드: ' + code + '\n방에 들어왔어요. 다만 현재는 방 생성/입장까지 구현되어 있고, 실제 카드 선택과 전투 결과를 양쪽 화면에 동기화하는 기능은 다음 단계에서 추가해야 해요.';
+    } catch (err) {
+      roomStatus.textContent = '입장 실패: ' + (err?.message || String(err)) + '\nSQL 테이블과 RLS 정책을 확인해 주세요.';
+    } finally {
+      setRoomBusy(false);
+    }
+  }
+  createRoomBtn.addEventListener('click', createRoom);
+  joinRoomBtn.addEventListener('click', () => joinRoom());
+  const invitedCode = new URLSearchParams(location.search).get('room');
+  if (invitedCode) {
+    roomCodeInput.value = invitedCode.toUpperCase();
+    roomStatus.textContent = '친구 초대 링크로 들어왔어요! 위에서 연결 테스트를 완료한 다음 “코드로 입장”을 눌러 주세요.';
+  }
 })();
 </script>
 
