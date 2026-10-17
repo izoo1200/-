@@ -58,6 +58,7 @@ button,.ghost,.primary,.mpBtn,.mpSecondary{background:#fff!important;color:#111!
 #mpSetupCard{max-height:90vh!important}
 input,textarea,select{background:#fff!important;color:#111!important;border:1px solid #777!important;border-radius:0!important}
 @media(max-width:650px){.fighters{grid-template-columns:1fr!important}.top{align-items:flex-start!important}.top-actions{flex-wrap:wrap!important}}
+#introRulesOverlay{display:none!important}
 </style>
 
 </head>
@@ -83,7 +84,7 @@ input,textarea,select{background:#fff!important;color:#111!important;border:1px 
  </section>
  <aside class="sidecol">
   <div class="panel"><div class="paneltitle"><span>⚡ 돌발 이벤트</span><span class="badge">라운드당 12%</span></div><div class="paneldesc" id="eventstatus">전투가 끝난 뒤 가끔 예상 못 한 사건이 터져!</div><button class="eventbtn" id="eventtest">🎲 이벤트 체험하기</button><div class="paneldesc">체험 버튼은 테스트용이야. 실제 전투에선 확률에 따라 발생해.</div></div>
-  <div class="battlemsg" id="battlemsg"><div class="label">미라:</div> “후후, 어떤 수를 둘 거야?”<hr>손패에서 카드를 골라 첫 전투를 시작해 봐!</div>
+  <div class="battlemsg" id="battlemsg" aria-hidden="true" style="display:none"></div>
   <div class="panel logpanel"><div class="paneltitle"><span>📜 전투 기록</span><span class="badge" id="logcount">1 기록</span></div><div class="log" id="log"></div></div>
   <div class="notice">💡 <b>전략 팁</b><br>상대의 역할을 예측해 봐. 공격은 간파를 제압하고, 간파는 방어를 뚫고, 방어는 공격을 막아!</div>
   <details class="panel rules" id="rules"><summary>게임 규칙 보기</summary><ul>
@@ -180,7 +181,7 @@ case 5:name="🐈 고양이가 전투에 난입!";for(const f of[p,a]){if(f.hand
 }
 state.lastEvent=name;$("eventstatus").textContent=`마지막 이벤트: ${name}${state.randomNext?" · 다음 라운드 랜덤 카드":state.fogNext?" · 다음 라운드 능력 봉인":""}`;log(`⚡ 돌발 이벤트: ${name}`);return lines}
 function play(){if(busy||state.over||(!state.randomNext&&selected===null))return;busy=true;const p=state.player,a=state.ai;let pi=state.randomNext?Math.floor(Math.random()*p.hand.length):selected;let ai=aiChoose();if(state.randomNext)ai=Math.floor(Math.random()*a.hand.length);const pc=p.hand.splice(pi,1)[0],ac=a.hand.splice(ai,1)[0];selected=null;state.randomNext=false;const r=calcRound(pc,ac);p.history.push(pc);a.history.push(ac);if(pc==="A")p.removed.push(pc);else p.discard.push(pc);if(ac==="A")a.removed.push(ac);else a.discard.push(ac);
-let lines=[`<div class="dialogue">이쥬 · ${esc(DB[pc].name)}: “${esc(DB[pc].quote)}”</div>`,`<div class="dialogue">미라 · ${esc(DB[ac].name)}: “${esc(DB[ac].quote)}”</div>`,...r.lines.map(x=>`<div>• ${esc(x)}</div>`),`<div style="margin-top:8px"><b>라운드 결과:</b> 이쥬 ${r.pDmg} 피해 / 미라 ${r.aDmg} 피해</div>`,`<hr>`,...banter(pc,ac,r).map(x=>`<div class="dialogue">${esc(x)}</div>`)];
+let lines=[...r.lines.map(x=>`<div>• ${esc(x)}</div>`),`<div style="margin-top:8px"><b>라운드 결과:</b> 이쥬 ${r.pDmg} 피해 / 미라 ${r.aDmg} 피해</div>`,`<hr>`];
 $("battlemsg").innerHTML=lines.join("");$("playerfighter").classList.add("flash");$("aifighter").classList.add("flash");setTimeout(()=>{$("playerfighter").classList.remove("flash");$("aifighter").classList.remove("flash")},400);log(`ROUND ${state.round}: ${DB[pc].symbol} ${DB[pc].name} vs ${DB[ac].symbol} ${DB[ac].name} — 이쥬 ${r.pDmg} 피해, 미라 ${r.aDmg} 피해.`);if(pc==="A")log("이쥬의 A는 사용 후 게임에서 제거됐어.");if(ac==="A")log("미라의 A는 사용 후 게임에서 제거됐어.");
 let end=outcome();if(!end&&Math.random()<.12){const beforeP=p.hp,beforeA=a.hp;const ev=eventApply(false,r);lines.push(`<hr><div class="label">⚡ 돌발 이벤트 발생!</div>`,...ev.map(x=>`<div>${esc(x)}</div>`));const oldLeader=beforeP===beforeA?"tie":beforeP>beforeA?"p":"a",newLeader=p.hp===a.hp?"tie":p.hp>a.hp?"p":"a";if(oldLeader!=="tie"&&newLeader!=="tie"&&oldLeader!==newLeader){lines.push('<div style="color:var(--gold);font-weight:950;margin-top:8px">🌟 전황 역전! 흐름이 바뀌었어!</div>');log("🌟 돌발 이벤트로 전황이 역전됐어!")}$("battlemsg").innerHTML=lines.join("");end=outcome()}
 if(end){state.over=true;busy=false;render();showResult(end);return}draw(p);draw(a);state.round++;busy=false;render();$("toast").textContent="다음 라운드! 새 손패를 확인하고 골라 줘."}
@@ -208,22 +209,22 @@ try { if (sessionStorage.getItem("starlight-duel-rules-seen") === "1") introRule
 #mpSetupStatus{padding:12px;border-radius:10px;background:#100d22;margin-top:12px;white-space:pre-wrap;overflow-wrap:anywhere}
 #mpSetupCard .mpNote{font-size:.9rem;color:#b9aed5}
 </style>
-<button id="mpSetupLauncher" type="button">✨ 멀티플레이 연결 설정</button>
+<button id="mpSetupLauncher" type="button">온라인 대전</button>
 <div id="mpSetupOverlay" role="dialog" aria-modal="true" aria-labelledby="mpSetupTitle">
   <div id="mpSetupCard">
     <h2 id="mpSetupTitle">별빛 결투 · 연결 설정</h2>
-    <p>Supabase 연결 정보를 이 브라우저에만 저장하고 연결을 테스트해요. 이 단계는 연결 확인용이며, 아직 실제 카드 대전 동기화가 완성된 것은 아니에요.</p>
-    <label for="mpProjectUrl">Project URL</label>
-    <input id="mpProjectUrl" type="url" placeholder="https://xxxxxxxx.supabase.co" autocomplete="url">
-    <label for="mpPublishableKey">Publishable key (또는 anon 공개용 키)</label>
-    <input id="mpPublishableKey" type="password" placeholder="sb_publishable_..." autocomplete="off">
-    <p class="mpNote">공개용 키만 입력해 주세요. service_role 또는 secret 키는 절대 입력하지 마세요.</p>
-    <button class="mpBtn" id="mpSaveTest" type="button">저장하고 연결 테스트</button>
+    <p>새 대전방을 만들거나 친구의 초대 코드로 입장하세요.</p>
+    <label for="mpProjectUrl" style="display:none">Project URL</label>
+    <input id="mpProjectUrl" type="url" placeholder="https://xxxxxxxx.supabase.co" autocomplete="url" style="display:none">
+    <label for="mpPublishableKey" style="display:none">Publishable key (또는 anon 공개용 키)</label>
+    <input id="mpPublishableKey" type="password" placeholder="sb_publishable_..." autocomplete="off" style="display:none">
+    <p class="mpNote" style="display:none">공개용 키만 입력해 주세요. service_role 또는 secret 키는 절대 입력하지 마세요.</p>
+    <button class="mpBtn" id="mpSaveTest" type="button" style="display:none">저장하고 연결 테스트</button>
     <button class="mpBtn mpSecondary" id="mpCloseSetup" type="button">닫기</button>
-    <div id="mpSetupStatus" aria-live="polite">아직 연결을 테스트하지 않았어요.</div>
-    <hr style="border-color:#514267;margin:18px 0">
+    <div id="mpSetupStatus" aria-live="polite" style="display:none">연결 상태</div>
+    
     <h3 style="margin:0 0 8px">친구와 방 만들기</h3>
-    <p class="mpNote">먼저 위에서 연결 테스트를 성공시킨 뒤 사용해 주세요. 지금 단계에서는 방 생성과 초대 코드 입장까지 확인할 수 있어요. 실제 카드 전투 동기화는 다음 단계예요.</p>
+    
     <button class="mpBtn" id="mpCreateRoom" type="button">🌟 새 대전방 만들기</button>
     <label for="mpRoomCode">친구에게 받은 초대 코드</label>
     <input id="mpRoomCode" type="text" placeholder="예: A7K9Q2" autocomplete="off" maxlength="8" style="text-transform:uppercase">
@@ -242,6 +243,15 @@ try { if (sessionStorage.getItem("starlight-duel-rules-seen") === "1") introRule
   const closeBtn = document.getElementById('mpCloseSetup');
   const saveBtn = document.getElementById('mpSaveTest');
   const STORAGE_KEY = 'starlight-duel-supabase-config';
+  // The host's invite URL carries the public Supabase URL/key. Save them on the guest device automatically.
+  try {
+    const params = new URLSearchParams(location.search);
+    const sharedUrl = params.get('sburl');
+    const sharedKey = params.get('sbkey');
+    if (sharedUrl && sharedKey && /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(sharedUrl) && !/service_role|secret/i.test(sharedKey)) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({url: sharedUrl.replace(/\/+$/, ''), key: sharedKey}));
+    }
+  } catch (_) {}
   const show = () => { overlay.style.display = 'flex'; };
   const hide = () => { overlay.style.display = 'none'; };
   openBtn.addEventListener('click', show);
@@ -327,13 +337,20 @@ try { if (sessionStorage.getItem("starlight-duel-rules-seen") === "1") introRule
   function makeInviteLink(code) {
     const url = new URL(location.href);
     url.searchParams.set('room', code);
+    try {
+      const cfg = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      if (cfg.url && cfg.key) {
+        url.searchParams.set('sburl', cfg.url);
+        url.searchParams.set('sbkey', cfg.key);
+      }
+    } catch (_) {}
     return url.toString();
   }
   async function createRoom() {
     if (roomBusy) return;
     const client = getClient();
     if (!client) {
-      roomStatus.textContent = '먼저 Project URL과 Publishable/anon 공개용 키를 입력하고 연결 테스트를 성공시켜 주세요.';
+      roomStatus.textContent = '연결 설정을 찾을 수 없어요. 방장이 최신 사이트에서 초대 링크를 다시 만들어 보내 주세요.';
       return;
     }
     setRoomBusy(true, '방을 만들고 있어요…');
@@ -353,15 +370,15 @@ try { if (sessionStorage.getItem("starlight-duel-rules-seen") === "1") introRule
           saveCurrentRoom(currentRoom);
           roomCodeInput.value = code;
           const invite = makeInviteLink(code);
-          roomStatus.textContent = '방을 만들었어요! ✨\n\n초대 코드: ' + code + '\n친구 초대 링크:\n' + invite + '\n\n링크를 복사해서 친구에게 보내 주세요. 친구가 입장하면 방 상태를 확인할 수 있어요.';
+          roomStatus.textContent = '초대 코드: ' + code + '\n초대 링크: ' + invite;
           const copyBtn = document.createElement('button');
           copyBtn.type = 'button';
           copyBtn.className = 'mpBtn mpSecondary';
-          copyBtn.textContent = '📋 초대 링크 복사';
+          copyBtn.textContent = '초대 링크 복사';
           copyBtn.style.display = 'block';
           copyBtn.addEventListener('click', async () => {
-            try { await navigator.clipboard.writeText(invite); roomStatus.textContent = '초대 링크를 복사했어요! 💗\n' + invite; }
-            catch (_) { roomStatus.textContent = '자동 복사가 안 됐어요. 아래 링크를 길게 눌러 복사해 주세요.\n' + invite; }
+            try { await navigator.clipboard.writeText(invite); roomStatus.textContent = '초대 코드: ' + code + '\n초대 링크: ' + invite + '\n(링크 복사 완료)'; }
+            catch (_) { roomStatus.textContent = '초대 코드: ' + code + '\n초대 링크: ' + invite; }
           });
           roomStatus.appendChild(document.createElement('br'));
           roomStatus.appendChild(copyBtn);
@@ -385,7 +402,7 @@ try { if (sessionStorage.getItem("starlight-duel-rules-seen") === "1") introRule
     }
     const client = getClient();
     if (!client) {
-      roomStatus.textContent = '먼저 Project URL과 Publishable/anon 공개용 키를 입력하고 연결 테스트를 성공시켜 주세요.';
+      roomStatus.textContent = '연결 설정을 찾을 수 없어요. 방장이 최신 사이트에서 초대 링크를 다시 만들어 보내 주세요.';
       return;
     }
     setRoomBusy(true, '초대 코드를 확인하고 있어요…');
@@ -399,7 +416,7 @@ try { if (sessionStorage.getItem("starlight-duel-rules-seen") === "1") introRule
       if (found.data.status !== 'waiting' || found.data.guest_token) {
         const saved = JSON.parse(localStorage.getItem(roomStorageKey) || '{}');
         if (saved.id === found.data.id && saved.role === 'guest') {
-          roomStatus.textContent = '이미 이 방에 입장한 상태예요. ✨\n초대 코드: ' + code + '\n(실제 전투 동기화는 다음 단계에서 연결할게요.)';
+          roomStatus.textContent = '이미 이 방에 입장한 상태예요.\n초대 코드: ' + code;
           return;
         }
         roomStatus.textContent = '이 방은 이미 시작했거나 두 번째 자리가 찼어요. 새 초대 코드를 받아 주세요.';
@@ -414,7 +431,7 @@ try { if (sessionStorage.getItem("starlight-duel-rules-seen") === "1") introRule
       }
       saveCurrentRoom({ id: update.data.id, code: update.data.room_code, role: 'guest', token: guestToken });
       roomCodeInput.value = code;
-      roomStatus.textContent = '입장 성공! 🚪✨\n초대 코드: ' + code + '\n방에 들어왔어요. 이제 온라인 대전을 시작할 수 있어요! 양쪽 모두 카드를 제출하면 라운드가 진행돼요.';
+      roomStatus.textContent = '입장 성공!\n초대 코드: ' + code;
     } catch (err) {
       roomStatus.textContent = '입장 실패: ' + (err?.message || String(err)) + '\nSQL 테이블과 RLS 정책을 확인해 주세요.';
     } finally {
@@ -426,7 +443,7 @@ try { if (sessionStorage.getItem("starlight-duel-rules-seen") === "1") introRule
   const invitedCode = new URLSearchParams(location.search).get('room');
   if (invitedCode) {
     roomCodeInput.value = invitedCode.toUpperCase();
-    roomStatus.textContent = '친구 초대 링크로 들어왔어요! 위에서 연결 테스트를 완료한 다음 “코드로 입장”을 눌러 주세요.';
+    roomStatus.textContent = '초대 링크를 확인했어요. 코드를 확인한 뒤 “코드로 입장”을 눌러 주세요.';
   }
 })();
 </script>
@@ -456,7 +473,7 @@ async function save(row,gs){const {data,error}=await client.from('duel_rooms').u
 function orient(b){b=copy(b);if(room.role==='guest'){[b.player,b.ai]=[b.ai,b.player]}return b}
 function submit(){if(busyOnline||state.over)return;if(selected===null&&!state.randomNext){banner('먼저 사용할 카드를 골라 줘!');return}submitAsync()}
 async function submitAsync(){busyOnline=true;try{let row=await fetchRoom();if(!row?.game_state?.battle)throw Error('공유 게임이 준비되지 않았어. 방장이 새 방을 만들어 줘.');const round=row.game_state.battle.round;const {data:existing,error:readErr}=await client.from('duel_moves').select('id').eq('room_id',room.id).eq('round_no',round).eq('player_role',room.role).maybeSingle();if(readErr)throw readErr;if(existing){banner('이번 라운드 카드는 이미 제출했어. 상대가 선택할 때까지 기다려 줘!');return}const idx=state.randomNext?Math.floor(Math.random()*state.player.hand.length):selected;const card=state.player.hand[idx];if(!card)throw Error('선택한 카드를 찾을 수 없어.');const {error}=await client.from('duel_moves').insert({room_id:room.id,round_no:round,player_role:room.role,card_id:card});if(error){if(String(error.code)==='23505'){banner('이번 라운드 카드는 이미 제출했어. 상대가 선택할 때까지 기다려 줘!');return}throw error}selected=null;render();banner('카드 제출 완료! 상대가 선택할 때까지 기다리는 중…');await poll()}catch(e){banner('카드 제출 실패: '+(e.message||e)+'\nSupabase에서 duel_moves 테이블 SQL을 실행했는지 확인해 줘.')}finally{busyOnline=false}}
-function resolve(b,hostCard,guestCard){state=copy(b);const p=state.player,a=state.ai,pi=p.hand.indexOf(hostCard),ai=a.hand.indexOf(guestCard);if(pi<0||ai<0)throw Error('선택한 카드가 현재 손패에 없어. 새 방을 만들어 다시 시작해 줘.');const pc=p.hand.splice(pi,1)[0],ac=a.hand.splice(ai,1)[0];state.randomNext=false;const r=calcRound(pc,ac);p.history.push(pc);a.history.push(ac);if(pc==='A')p.removed.push(pc);else p.discard.push(pc);if(ac==='A')a.removed.push(ac);else a.discard.push(ac);log(`ROUND ${state.round}: ${DB[pc].name} vs ${DB[ac].name} — 플레이어 1 ${r.pDmg} 피해, 플레이어 2 ${r.aDmg} 피해.`);let ev=[],end=outcome();if(!end&&Math.random()<.12){ev=eventApply(false,r);end=outcome()}if(!end){draw(p);draw(a);state.round++}else state.over=true;state.onlineLines=[`<div class="dialogue">플레이어 1 · ${esc(DB[pc].name)}: “${esc(DB[pc].quote)}”</div>`,`<div class="dialogue">플레이어 2 · ${esc(DB[ac].name)}: “${esc(DB[ac].quote)}”</div>`,...r.lines.map(x=>`<div>• ${esc(x)}</div>`),`<div><b>라운드 결과:</b> 플레이어 1 ${r.pDmg} 피해 / 플레이어 2 ${r.aDmg} 피해</div>`,...ev.map(x=>`<div>${esc(x)}</div>`)];state.onlineOutcome=end;return copy(state)}
+function resolve(b,hostCard,guestCard){state=copy(b);const p=state.player,a=state.ai,pi=p.hand.indexOf(hostCard),ai=a.hand.indexOf(guestCard);if(pi<0||ai<0)throw Error('선택한 카드가 현재 손패에 없어. 새 방을 만들어 다시 시작해 줘.');const pc=p.hand.splice(pi,1)[0],ac=a.hand.splice(ai,1)[0];state.randomNext=false;const r=calcRound(pc,ac);p.history.push(pc);a.history.push(ac);if(pc==='A')p.removed.push(pc);else p.discard.push(pc);if(ac==='A')a.removed.push(ac);else a.discard.push(ac);log(`ROUND ${state.round}: ${DB[pc].name} vs ${DB[ac].name} — 플레이어 1 ${r.pDmg} 피해, 플레이어 2 ${r.aDmg} 피해.`);let ev=[],end=outcome();if(!end&&Math.random()<.12){ev=eventApply(false,r);end=outcome()}if(!end){draw(p);draw(a);state.round++}else state.over=true;state.onlineLines=[...r.lines.map(x=>`<div>• ${esc(x)}</div>`),`<div><b>라운드 결과:</b> 플레이어 1 ${r.pDmg} 피해 / 플레이어 2 ${r.aDmg} 피해</div>`,...ev.map(x=>`<div>${esc(x)}</div>`)];state.onlineOutcome=end;return copy(state)}
 async function poll(){if(!client||!room)return;try{let row=await fetchRoom();if(!row)return;let gs=row.game_state||{};if(room.role==='host'&&!gs.battle){gs={battle:copy(state),pending:{},resolvedRound:0};await save(row,gs);row=await fetchRoom();gs=row.game_state||{}}
 if(!gs.battle){banner('공유 대전 상태를 준비하는 중이야…');return}
 let {data:moves,error:moveErr}=await client.from('duel_moves').select('round_no,player_role,card_id').eq('room_id',room.id).eq('round_no',gs.battle.round);if(moveErr)throw moveErr;moves=moves||[];const hostMove=moves.find(m=>m.player_role==='host'),guestMove=moves.find(m=>m.player_role==='guest');
@@ -469,6 +486,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 <style id="wireframe-final-overrides">
 body{background:#fff!important;color:#111!important} .app{background:#fff!important} .logo,.fighter:after{display:none!important} .fighter,.roundbar,.card,.panel,.box,.sectionhead,.log,.battlemsg,.condition,.phase,.hand .playing-card,#mpSetupCard,#mpSetupStatus,.modal,.overlay,.result-card,#rulesIntro .ri{background:#fff!important;color:#111!important;border:1px solid #888!important;border-radius:0!important;box-shadow:none!important} .ghost,.primary,.secondary,button{background:#fff!important;color:#111!important;border:1px solid #777!important;border-radius:0!important;box-shadow:none!important} #rulesIntro{background:#ffffffcc!important} #rulesIntro .ri{max-height:85vh!important} #rulesIntro h2,#rulesIntro p,#rulesIntro li,#rulesIntro b,#rulesIntro button{color:#111!important} #mpSetupOverlay{background:#ffffffcc!important} #mpSetupCard input{background:#fff!important;color:#111!important;border-radius:0!important} .bar,.fill{border-radius:0!important;box-shadow:none!important} .fill{background:#aaa!important} .pill{background:#fff!important;color:#111!important;border:1px solid #888!important;border-radius:0!important} .card:after{display:none!important}
+.battlemsg{display:none!important}
+#introRulesOverlay{display:none!important}
 </style>
 </body>
 </html>
