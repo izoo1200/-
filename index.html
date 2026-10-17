@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>수다떨쥬 게임 테스트</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#fff;color:#171717;font-family:Arial,"Apple SD Gothic Neo",sans-serif;padding:24px 16px}main{max-width:760px;margin:0 auto}h1{font-size:1.35rem;font-weight:700;margin:0 0 24px}h2{font-size:1.15rem;margin:0 0 18px}h3{font-size:1rem;margin:0 0 12px}button,input,select{font:inherit;border:1px solid #bbb;border-radius:4px;padding:10px 12px;background:#fff;color:#171717}button{cursor:pointer}button:hover{background:#f3f3f3}button:disabled{opacity:.45;cursor:default}.panel{background:#fff;border:0;border-top:1px solid #ddd;border-radius:0;padding:20px 0;margin:18px 0}.players,.cards{display:flex;gap:8px;flex-wrap:wrap}.player,.card{border:1px solid #ccc;border-radius:4px;padding:12px;background:#fff;min-width:110px}.player.active{border:2px solid #222}.card{width:140px;cursor:pointer}.card.selected{outline:2px solid #222}.common{color:#333}.rare{color:#555}.epic{color:#111;font-weight:700}.muted{color:#666;font-size:.92rem}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.hidden{display:none!important}.log{white-space:pre-wrap;max-height:220px;overflow:auto;background:#f7f7f7;padding:12px;border:1px solid #eee}.hp{color:#b42318;font-weight:700}.pill{display:inline-block;padding:3px 8px;border:1px solid #bbb;font-size:.8rem}.screen{min-height:65vh}.mode-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mode-buttons button{min-height:110px;font-size:1.1rem;background:#fff;border:1px solid #aaa}.mode-buttons button:hover{border-color:#111;background:#fafafa}.back{margin-bottom:24px;border:0;padding:0;color:#555;text-decoration:underline;background:transparent}.screen-footer{margin-top:32px}.version-label{position:fixed;right:12px;bottom:10px;font-size:11px;line-height:1;color:#999;opacity:.8;pointer-events:none;user-select:none;z-index:1000}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:#171717;font-family:Arial,"Apple SD Gothic Neo",sans-serif;padding:24px 16px}main{max-width:760px;margin:0 auto}h1{font-size:1.35rem;font-weight:700;margin:0 0 24px}h2{font-size:1.15rem;margin:0 0 18px}h3{font-size:1rem;margin:0 0 12px}button,input,select{font:inherit;border:1px solid #bbb;border-radius:4px;padding:10px 12px;background:#fff;color:#171717}button{cursor:pointer}button:hover{background:#f3f3f3}button:disabled{opacity:.45;cursor:default}.panel{background:#fff;border:0;border-top:1px solid #ddd;border-radius:0;padding:20px 0;margin:18px 0}.players,.cards{display:flex;gap:8px;flex-wrap:wrap}.player,.card{border:1px solid #ccc;border-radius:4px;padding:12px;background:#fff;min-width:110px}.player.active{border:2px solid #222}.card{width:140px;cursor:pointer}.card.selected{outline:2px solid #222}.common{color:#333}.rare{color:#555}.epic{color:#111;font-weight:700}.muted{color:#666;font-size:.92rem}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.hidden{display:none!important}.log{white-space:pre-wrap;max-height:220px;overflow:auto;background:#f7f7f7;padding:12px;border:1px solid #eee}.hp{color:#b42318;font-weight:700}.pill{display:inline-block;padding:3px 8px;border:1px solid #bbb;font-size:.8rem}.screen{min-height:65vh}.mode-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mode-buttons button{min-height:110px;font-size:1.1rem;background:#fff;border:1px solid #aaa}.mode-buttons button:hover{border-color:#111;background:#fafafa}.back{margin-bottom:24px;border:0;padding:0;color:#555;text-decoration:underline;background:transparent}.screen-footer{margin-top:32px}.version-badge{position:fixed;right:12px;bottom:10px;z-index:1000;font-size:11px;line-height:1;color:#999;opacity:.8;pointer-events:none;user-select:none}
 </style></head>
 <body><main><h1>수다떨쥬 게임 테스트</h1>
 <section class="screen" id="modeSelect"><h2>대전 방식 선택</h2><div class="mode-buttons"><button id="modeAI">AI와 대전</button><button id="modeFriend">친구 대전</button></div><div class="screen-footer"><button id="showRules" class="back">게임 규칙 보기</button></div></section>
@@ -34,7 +34,7 @@
 <div class="panel"><h3 id="phaseTitle">행동</h3><p id="instruction"></p><div class="cards" id="hand"></div><div class="row" style="margin-top:12px"><label id="targetWrap">대상 <select id="target"></select></label><button id="submit">선택 완료</button><button id="pass" class="hidden">응답하지 않기</button></div></div>
 <div class="panel"><h3>전투 기록</h3><div id="log" class="log"></div></div></section>
 </main>
-<div class="version-label" aria-label="게임 버전">v0.0.1</div>
+<div class="version-badge" aria-label="버전 0.0.2">v0.0.2</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const CARD_DEFS=[
@@ -113,7 +113,7 @@ let sb=null, onlineRoom=null, lobbyTimer=null, gameStartHandled=false;
 const $o=id=>document.getElementById(id);
 function onlineMsg(t){$o('onlineError').textContent=t}
 function cfg(){try{const current=JSON.parse(localStorage.getItem(ONLINE_KEY)||'{}');if(current.url&&current.key)return current;for(const k of ['starlight-duel-supabase-config','starlight-duel-current-config','supabase-config']){const old=JSON.parse(localStorage.getItem(k)||'{}');if(old.url&&old.key){localStorage.setItem(ONLINE_KEY,JSON.stringify(old));return old}}return {}}catch{return {}}}
-function initConfig(){const q=new URLSearchParams(location.search);let c=cfg();if(q.get('sburl')&&q.get('sbkey')&&!/secret|service_role/i.test(q.get('sbkey'))){c={url:q.get('sburl'),key:q.get('sbkey')};localStorage.setItem(ONLINE_KEY,JSON.stringify(c))}if(q.get('room')){$o('joinCode').value=q.get('room');setTimeout(()=>joinOnlineRoom(q.get('room')),300)}}
+function initConfig(){const q=new URLSearchParams(location.search);let c=cfg();if(q.get('sburl')&&q.get('sbkey')&&!/secret|service_role/i.test(q.get('sbkey'))){c={url:q.get('sburl'),key:q.get('sbkey')};localStorage.setItem(ONLINE_KEY,JSON.stringify(c))}if(q.get('room')){$o('joinCode').value=q.get('room');}}
 function connect(){const c=cfg();if(!c.url||!c.key||!window.supabase?.createClient)throw Error('저장된 온라인 연결 정보를 찾지 못했어. 기존에 연결했던 사이트에서 열거나, 친구 초대 링크로 접속해 줘.');sb=window.supabase.createClient(c.url,c.key);return sb}
 function token(){return crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36)}
 function makeCode(){return Array.from(crypto.getRandomValues(new Uint8Array(6)),n=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[n%32]).join('')}
@@ -136,7 +136,7 @@ $o('friendBack').addEventListener('click',()=>{if(lobbyTimer)clearInterval(lobby
 $o('aiBack').addEventListener('click',()=>showScreen('modeSelect'));
 $o('gameBack').addEventListener('click',()=>{clearInterval(timer);showScreen('modeSelect')});
 initConfig();
-// Invite URLs jump straight into the friend lobby; ordinary visits show the two-mode menu.
+// Invite URLs open the friend screen with the room code prefilled. The player must enter a nickname and press '방 참가' to join.
 if(new URLSearchParams(location.search).get('room'))showScreen('onlineSetup');
 
 </script></body></html>
