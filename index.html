@@ -355,6 +355,35 @@ body.double-damage-mode main h1:after,body.double-damage-mode main h2:before{bac
 #dangerDialog{background:#a84e58!important;border-color:#f7e8e8!important;box-shadow:0 0 0 4px #a84e58,0 12px 35px rgba(105,30,40,.22)!important;animation:dangerDialogPulse .8s ease-in-out 3 alternate!important}
 #dangerTitle{text-shadow:1px 1px 0 rgba(70,20,25,.5)!important}
 @keyframes dangerDialogPulse{from{transform:scale(1)}to{transform:scale(1.008)}}
+
+/* v0.1.82: 온라인 대기실을 게임 로비처럼 재배치 (기존 동작/ID 유지) */
+#onlineSetup:has(#lobby:not(.hidden)){max-width:1120px;margin:0 auto;padding:4px 0 28px}
+#onlineSetup:has(#lobby:not(.hidden))>#friendBack{color:#c7c4d8;margin:0 0 12px}
+#onlineSetup:has(#lobby:not(.hidden))>#onlineTitle{font-size:clamp(1.45rem,3vw,2rem);color:#f5e7d5;margin:0 0 8px}
+#onlineSetup:has(#lobby:not(.hidden))>#onlineDescription{color:#b9b5c9;line-height:1.65;margin:0 0 18px}
+#lobby.panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,.62fr);grid-template-areas:'head head' 'code invite' 'settings settings' 'players status' 'roster status' 'start start' 'rules rules';gap:12px 14px;position:relative;overflow:hidden;margin:0;padding:20px;border:1px solid #62516f;border-radius:18px;background:linear-gradient(145deg,#242333 0%,#171a28 70%,#292033 100%);color:#f8f0e8;box-shadow:0 14px 38px rgba(19,14,29,.2)}
+#lobby.panel:before{content:'✦  ♡  ✧';position:absolute;right:18px;top:8px;color:#d6a9c7;opacity:.28;font-size:2rem;pointer-events:none}
+#lobby>#lobbyHeading{grid-area:head;font-size:1.35rem;margin:0;padding:0 0 12px;border-bottom:1px solid #4b4057;color:#ffe0ec}
+#lobby>p:not(#lobbyStatus){grid-area:code;margin:0;padding:12px 14px;border:1px solid #51445f;border-radius:12px;background:#302a3c;color:#e8d9ef;align-self:stretch}
+#lobby>.row:first-of-type{grid-area:invite;display:flex;min-width:0;flex-wrap:nowrap;padding:8px;border:1px solid #51445f;border-radius:12px;background:#302a3c}
+#inviteLink{min-width:0!important;width:100%;background:#1e1e2d;color:#e6dceb;border-color:#51445f;border-radius:8px}
+#copyInvite{flex-shrink:0;background:#f4c5d9;color:#392538;border:0;border-radius:9px;font-weight:800}
+#lobbyHandSizeRow{grid-area:settings!important;margin:0!important;padding:12px 14px;border:1px solid #51445f;border-radius:12px;background:#292838}
+#lobbyHandSizeRow label{color:#f8e6ee;font-weight:800}#lobbyHandSize{margin-left:8px;border-radius:8px;border-color:#62516f}
+#lobbyHandSizeHint{color:#bdb6ca}
+#lobby>h4{grid-area:players;margin:8px 0 0;color:#ffd3e4;font-size:1.05rem}
+#roster{grid-area:roster;list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-content:start}
+#roster li{min-width:0;min-height:72px;padding:12px;border:1px solid #51485f!important;border-radius:12px;background:linear-gradient(145deg,#353044,#292838)!important;color:#f7edf5;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+#roster li>span{overflow-wrap:anywhere;line-height:1.5;font-weight:700}
+#roster .kick-player{background:#453044!important;border:1px solid #a66c89!important;color:#ffe1ee!important;border-radius:8px!important}
+#lobbyStatus{grid-area:status;align-self:stretch;margin:0;padding:18px 16px;min-height:150px;border:1px solid #51445f;border-radius:14px;background:radial-gradient(circle at 80% 15%,rgba(214,169,199,.14),transparent 38%),#211f2e;color:#e9cfe0;line-height:1.7;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700}
+#hostStart{grid-area:start;justify-self:start;min-width:min(100%,300px);padding:15px 24px;border:1px solid #ffb4d0;border-radius:13px;background:linear-gradient(100deg,#ec78ad,#c65d98)!important;color:white!important;font-weight:900;box-shadow:0 4px 0 #87426f}
+#hostStart:disabled{box-shadow:none;filter:saturate(.5)}
+#lobby>.lobby-rules{grid-area:rules;color:#e7dbe9;border-top-color:#51445f!important;padding-top:12px!important}
+#lobby .lobby-rules summary{color:#f4d8e8}#lobby .lobby-rules .muted{color:#c8c0d0}
+@media(max-width:760px){#lobby.panel{grid-template-columns:minmax(0,1fr);grid-template-areas:'head' 'code' 'invite' 'settings' 'players' 'roster' 'status' 'start' 'rules';padding:14px}#roster{grid-template-columns:repeat(2,minmax(0,1fr))}#lobbyStatus{min-height:80px}#hostStart{justify-self:stretch}}
+@media(max-width:420px){#roster{grid-template-columns:1fr}#lobby>.row:first-of-type{flex-wrap:wrap}#copyInvite{width:100%}}
+
 </style></head>
 <body><div id="startSequence" class="hidden" role="dialog" aria-modal="true" aria-live="assertive"><div class="start-sequence-card"><div class="start-sequence-kicker">READY?</div><div id="startSequenceNumber" class="start-sequence-number">3</div><div id="startSequenceMessage" class="start-sequence-message">게임을 준비하고 있어!</div></div></div><div id="eventPopup" class="hidden" role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle"><div class="event-card"><div id="eventPopupTitle" class="event-heading">이벤트 발생</div><div id="eventPopupMessage" class="event-message"></div></div></div><main>
 <header class="game-brand"><div class="brand-mark">IZOO <span>GAME LAB</span></div><div class="brand-title"><h1>이쥬의 게임 테스트</h1><p>PLAY · READ · REACT</p></div><div class="brand-credit">CREATED BY <strong>IZOO</strong></div></header>
@@ -391,7 +420,7 @@ body.double-damage-mode main h1:after,body.double-damage-mode main h2:before{bac
 <div id="dangerBackdrop" class="hidden" role="alertdialog" aria-modal="true" aria-labelledby="dangerTitle"><div id="dangerDialog"><div id="dangerKicker">⚠ 비상 경보 · DAMAGE OVERDRIVE</div><h2 id="dangerTitle">위험해!!!<br>이제부터 데미지가 두 배야!!!</h2><p id="dangerSub">모든 공격과 상태이상 피해 ×2</p></div></div>
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.1.81">v0.1.81</div>
+<div class="version-badge" aria-label="버전 0.1.82">v0.1.82</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
