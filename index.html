@@ -239,6 +239,13 @@ main{max-width:960px;margin:0 auto;background:#fff;border:1px solid #e2e0dc;padd
 @media(max-width:620px){main{padding:20px;min-height:calc(100vh - 28px)}.game-brand{grid-template-columns:1fr auto;gap:10px;padding-bottom:18px;margin-bottom:24px}.brand-title{grid-column:1/-1;grid-row:1;text-align:left}.brand-mark{grid-column:1;grid-row:2}.brand-credit{grid-column:2;grid-row:2}.mode-buttons button{min-height:125px;padding:18px}.mode-buttons button:before{margin-bottom:28px}.mode-profile.panel{padding:18px}.intro-avatars{grid-template-columns:repeat(5,minmax(0,1fr))}}
 
 .announcement-input-locked .players,.announcement-input-locked .cards,.announcement-input-locked #targetWrap,.announcement-input-locked #submit,.announcement-input-locked #pass{pointer-events:none}.announcement-input-locked #submit,.announcement-input-locked #pass{opacity:.45}
+/* v0.1.23: 현재 턴 강조는 유지하되 플레이어 카드 너비를 고정해 줄바꿈 방지 */
+.players{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px}
+.players .player,.players .player.active{flex:0 1 145px!important;min-width:0!important;width:145px;max-width:145px;padding:12px!important;}
+.players .player.active{border:2px solid #171717!important;box-shadow:inset 0 -4px 0 #171717,0 0 0 2px rgba(23,23,23,.08)!important;background:#f3f3f3!important;}
+.players .player.active .player-avatar{font-size:2.6rem!important;margin-bottom:8px!important;}
+.players .player.active .player-name{font-size:1.08rem!important;font-weight:900!important;}
+@media(max-width:600px){.players{gap:8px}.players .player,.players .player.active{flex:1 1 calc(33.333% - 8px)!important;width:auto;max-width:none;min-width:0!important;padding:10px 7px!important}.players .player.active .player-avatar{font-size:2.3rem!important}.players .player.active .player-name{font-size:1rem!important}}
 </style></head>
 <body><div id="startSequence" class="hidden" role="dialog" aria-modal="true" aria-live="assertive"><div class="start-sequence-card"><div class="start-sequence-kicker">READY?</div><div id="startSequenceNumber" class="start-sequence-number">3</div><div id="startSequenceMessage" class="start-sequence-message">게임을 준비하고 있어!</div></div></div><div id="eventPopup" class="hidden" role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle"><div class="event-card"><div id="eventPopupTitle" class="event-heading">이벤트 발생</div><div id="eventPopupMessage" class="event-message"></div></div></div><main>
 <header class="game-brand"><div class="brand-mark">IZOO <span>GAME LAB</span></div><div class="brand-title"><h1>이쥬의 게임 테스트</h1><p>PLAY · READ · REACT</p></div><div class="brand-credit">CREATED BY <strong>IZOO</strong></div></header>
@@ -272,7 +279,7 @@ main{max-width:960px;margin:0 auto;background:#fff;border:1px solid #e2e0dc;padd
 </section>
 <div id="soundSettingsPanel" class="sound-settings hidden" role="region" aria-label="효과음 설정" style="max-width:760px;margin:0 auto 48px"><div class="row" style="justify-content:space-between"><b>🔊 효과음 설정</b><button id="soundSettingsClose" type="button" aria-label="설정 닫기">닫기 ✕</button></div><label for="soundVolume" style="margin-top:10px">효과음 크기 <input id="soundVolume" type="range" min="0" max="100" step="5" value="70"><span id="soundVolumeLabel">70%</span></label><p class="muted" style="margin:8px 0 0">브금 없이 효과음만 조절해. 0%로 설정하면 음소거돼.</p><button id="soundTest" type="button" style="margin-top:10px">효과음 테스트</button></div>
 </main>
-<div class="version-badge" aria-label="버전 0.1.22">v0.1.22</div>
+<div class="version-badge" aria-label="버전 0.1.23">v0.1.23</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
