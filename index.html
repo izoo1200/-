@@ -302,9 +302,10 @@ main{max-width:960px;margin:0 auto;background:#fff;border:1px solid #e2e0dc;padd
 </section>
 <div id="soundSettingsPanel" class="sound-settings hidden" role="region" aria-label="효과음 설정" style="max-width:760px;margin:0 auto 48px"><div class="row" style="justify-content:space-between"><b>🔊 효과음 설정</b><button id="soundSettingsClose" type="button" aria-label="설정 닫기">닫기 ✕</button></div><label for="soundVolume" style="margin-top:10px">효과음 크기 <input id="soundVolume" type="range" min="0" max="100" step="5" value="70"><span id="soundVolumeLabel">70%</span></label><p class="muted" style="margin:8px 0 0">브금 없이 효과음만 조절해. 0%로 설정하면 음소거돼.</p><button id="soundTest" type="button" style="margin-top:10px">효과음 테스트</button></div>
 </main>
-<div class="version-badge" aria-label="버전 0.1.43">v0.1.43</div>
+<div class="version-badge" aria-label="버전 0.1.44">v0.1.44</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// v0.1.44: 새로고침 후 아바타 선택 표시가 중복되는 문제를 수정합니다.
 // v0.1.43: 기본 알림창에 최신 알림 3개를 표시합니다.
 // v0.1.41: AI/친구 대전에서 시작 손패 5장 또는 10장을 선택할 수 있습니다.
 // v0.1.31: 이벤트 알림이 표시되어도 기본 알림창을 숨기지 않습니다.
@@ -598,7 +599,8 @@ function escapeHtml(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&'
 function randomAvatar(){const avatars=['🦊','🐱','🐸','🐼','🐰','🐻','🐤','👻','🤖','😈'];return avatars[Math.floor(Math.random()*avatars.length)]}
 let selectedIntroAvatar=localStorage.getItem('izoo-intro-avatar')||'🦊';
 $('introAvatarPreview').textContent=selectedIntroAvatar;
-document.querySelectorAll('.intro-avatar').forEach(btn=>{if(btn.dataset.avatar===selectedIntroAvatar)btn.classList.add('active');btn.addEventListener('click',()=>{selectedIntroAvatar=btn.dataset.avatar;$('introAvatarPreview').textContent=selectedIntroAvatar;document.querySelectorAll('.intro-avatar').forEach(b=>b.classList.toggle('active',b===btn));localStorage.setItem('izoo-intro-avatar',selectedIntroAvatar);playSfx('select')})});
+const introAvatarButtons=[...document.querySelectorAll('.intro-avatar')];
+introAvatarButtons.forEach(btn=>{btn.classList.toggle('active',btn.dataset.avatar===selectedIntroAvatar);btn.addEventListener('click',()=>{selectedIntroAvatar=btn.dataset.avatar;$('introAvatarPreview').textContent=selectedIntroAvatar;introAvatarButtons.forEach(b=>b.classList.toggle('active',b.dataset.avatar===selectedIntroAvatar));localStorage.setItem('izoo-intro-avatar',selectedIntroAvatar);playSfx('select')})});
 $('introNick').value=localStorage.getItem('izoo-intro-nick')||'이쥬';
 function syncProfile(){const nick=$('introNick').value.trim().slice(0,16);if(nick){localStorage.setItem('izoo-intro-nick',nick);$('aiNick').value=nick;$('onlineNick').value=nick;sessionStorage.setItem('sudatteolzhu-nick',nick);$('setNickname').textContent='닉네임 설정 완료';$('joinRoom').disabled=false}localStorage.setItem('izoo-intro-avatar',selectedIntroAvatar)}
 const profilePanel=document.querySelector('.mode-profile');const profileHome=profilePanel.parentNode;const profileHomeNext=profilePanel.nextElementSibling;function placeProfileForInvite(show){if(!profilePanel)return;if(show){$('onlineSetup').insertBefore(profilePanel,$('nicknameRow'));profilePanel.querySelector('h3').textContent='내 캐릭터 설정';}else if(profilePanel.parentNode!==profileHome){profileHome.insertBefore(profilePanel,profileHomeNext);profilePanel.querySelector('h3').textContent='내 캐릭터 설정';}}
