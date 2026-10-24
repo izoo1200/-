@@ -269,6 +269,23 @@ main{max-width:960px;margin:0 auto;background:#fff;border:1px solid #e2e0dc;padd
 #eventPopup:not(.hidden){pointer-events:auto!important;cursor:pointer!important}
 #eventPopup:not(.hidden) .event-card{pointer-events:auto!important;cursor:pointer!important}
 #eventPopup .event-card{user-select:none}
+
+/* v0.1.45: 게임 화면의 세로 공간을 줄여 한 화면에 더 잘 들어오도록 조정 */
+#game.screen{min-height:0;padding-bottom:8px}
+#game>.panel{padding-top:12px;padding-bottom:12px;margin:10px 0}
+#game .row h2{margin-bottom:8px}
+#game #players{gap:7px}
+#game .player{padding:9px 10px;min-height:0}
+#game .player:before{margin-bottom:5px}
+#game .player .player-avatar{font-size:1.8rem;line-height:1;margin-bottom:5px}
+#game #status{margin:7px 0 2px}
+#game #announcements{margin:7px 0;line-height:1.55}
+#game #announcements .announcement-line{margin:1px 0}
+#game #hand{gap:7px}
+#game #hand .card{padding:9px;min-height:0}
+#game #instruction{margin:8px 0;padding:10px 12px}
+#game .chat-messages{height:120px}
+@media(max-width:600px){#game .player{flex:1 1 88px;padding:8px;min-width:0}#game .player .player-avatar{font-size:1.6rem}#game #hand .card{width:calc(50% - 4px);padding:8px}}
 </style></head>
 <body><div id="startSequence" class="hidden" role="dialog" aria-modal="true" aria-live="assertive"><div class="start-sequence-card"><div class="start-sequence-kicker">READY?</div><div id="startSequenceNumber" class="start-sequence-number">3</div><div id="startSequenceMessage" class="start-sequence-message">게임을 준비하고 있어!</div></div></div><div id="eventPopup" class="hidden" role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle"><div class="event-card"><div id="eventPopupTitle" class="event-heading">이벤트 발생</div><div id="eventPopupMessage" class="event-message"></div></div></div><main>
 <header class="game-brand"><div class="brand-mark">IZOO <span>GAME LAB</span></div><div class="brand-title"><h1>이쥬의 게임 테스트</h1><p>PLAY · READ · REACT</p></div><div class="brand-credit">CREATED BY <strong>IZOO</strong></div></header>
@@ -302,7 +319,7 @@ main{max-width:960px;margin:0 auto;background:#fff;border:1px solid #e2e0dc;padd
 </section>
 <div id="soundSettingsPanel" class="sound-settings hidden" role="region" aria-label="효과음 설정" style="max-width:760px;margin:0 auto 48px"><div class="row" style="justify-content:space-between"><b>🔊 효과음 설정</b><button id="soundSettingsClose" type="button" aria-label="설정 닫기">닫기 ✕</button></div><label for="soundVolume" style="margin-top:10px">효과음 크기 <input id="soundVolume" type="range" min="0" max="100" step="5" value="70"><span id="soundVolumeLabel">70%</span></label><p class="muted" style="margin:8px 0 0">브금 없이 효과음만 조절해. 0%로 설정하면 음소거돼.</p><button id="soundTest" type="button" style="margin-top:10px">효과음 테스트</button></div>
 </main>
-<div class="version-badge" aria-label="버전 0.1.44">v0.1.44</div>
+<div class="version-badge" aria-label="버전 0.1.45">v0.1.45</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.44: 새로고침 후 아바타 선택 표시가 중복되는 문제를 수정합니다.
