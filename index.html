@@ -349,9 +349,10 @@ main:has(#modeSelect):after{margin-top:24px}
 <div id="soundSettingsPanel" class="sound-settings hidden" role="region" aria-label="효과음 설정" style="max-width:760px;margin:0 auto 48px"><div class="row" style="justify-content:space-between"><b>🔊 효과음 설정</b><button id="soundSettingsClose" type="button" aria-label="설정 닫기">닫기 ✕</button></div><label for="soundVolume" style="margin-top:10px">효과음 크기 <input id="soundVolume" type="range" min="0" max="100" step="5" value="70"><span id="soundVolumeLabel">70%</span></label><p class="muted" style="margin:8px 0 0">브금 없이 효과음만 조절해. 0%로 설정하면 음소거돼.</p><button id="soundTest" type="button" style="margin-top:10px">효과음 테스트</button></div>
 </main>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.1.54">v0.1.54</div>
+<div class="version-badge" aria-label="버전 0.1.55">v0.1.55</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// v0.1.55: 부활 카드 발동 시 이전 체력과 관계없이 HP 30으로 복귀하도록 보장합니다.
 // v0.1.44: 새로고침 후 아바타 선택 표시가 중복되는 문제를 수정합니다.
 // v0.1.43: 기본 알림창에 최신 알림 3개를 표시합니다.
 // v0.1.41: AI/친구 대전에서 시작 손패 5장 또는 10장을 선택할 수 있습니다.
@@ -426,7 +427,7 @@ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random
 function alive(){return players.filter(p=>p.alive&&!p.left)}
 function refillPool(){return CARD_DEFS.map(c=>({...c}))}
 function draw(p,n=1,markNew=true){if(markNew&&n>0){for(const oldCard of p.hand)oldCard.isNew=false}for(let k=0;k<n;k++){let used=seen[p.id]||[];let available=CARD_DEFS.filter(c=>!used.includes(c.id));if(!available.length){seen[p.id]=[];used=[];available=refillPool();log('모든 카드 종류를 뽑아 개인 카드 풀이 다시 채워졌습니다.')}let rarity=Math.random()<.6?'common':Math.random()<.75?'rare':'epic';let choices=available.filter(c=>c.rarity===rarity);if(!choices.length)choices=available;if(!choices.length)continue;let card={...choices[Math.floor(Math.random()*choices.length)],isNew:!!markNew};used.push(card.id);seen[p.id]=used;p.hand.push(card)}}
-function checkDeath(p){if(!p||p.hp>0||!p.alive)return;const i=p.hand.findIndex(c=>c.kind==='revive');if(i>=0){p.hand.splice(i,1);p.hp=30;log(p.name+'의 부활 카드 자동 발동! HP 30으로 부활했습니다.');announce('['+p.name+'의 부활 카드가 발동했습니다!]')}else{p.hp=0;p.alive=false;log(p.name+' 탈락!');announce('['+p.name+'의 체력이 0이 되어 쓰러졌습니다!]')}}
+function checkDeath(p){if(!p||p.hp>0||!p.alive)return;const i=p.hand.findIndex(c=>c.kind==='revive');if(i>=0){p.hand.splice(i,1);p.maxHp=Math.max(30,Number(p.maxHp)||30);p.hp=30;p.alive=true;log(p.name+'의 부활 카드 자동 발동! HP 30으로 부활했습니다.');announce('['+p.name+'의 부활 카드가 발동했습니다! HP 30으로 부활합니다.]')}else{p.hp=0;p.alive=false;log(p.name+' 탈락!');announce('['+p.name+'의 체력이 0이 되어 쓰러졌습니다!]')}}
 function damage(p,n,source=null){if(!p.alive||n<=0)return;if(source&&source.alive&&source.id!==p.id)roundDamage[source.id]=(roundDamage[source.id]||0)+n;p.hp-=n;log(p.name+' 피해 '+n+' (HP '+Math.max(0,p.hp)+'/'+p.maxHp+')');checkDeath(p)}
 function heal(p,n){p.hp=Math.min(p.maxHp,p.hp+n);log(p.name+' HP '+n+' 회복 (현재 '+p.hp+'/'+p.maxHp+')')}
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
