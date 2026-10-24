@@ -318,7 +318,7 @@ main:has(#modeSelect):after{margin-top:24px}
 /* v0.1.56: 천사로 동귀어진을 막으면 공격자에게만 피해 적용 */
 
 /* v0.1.59: 공격 카드를 1/5/10으로 정리하고 방어 10/20 추가 */
-/* v0.1.63: 최대 체력 증가량과 등장 확률 하향 */
+/* v0.1.64: 초대 링크에서 호스트 프로필이 노출되지 않도록 분리 */
 /* v0.1.57: 모든 손패 카드의 세로 크기를 동일하게 맞춤 */
 #game #hand.cards{align-items:stretch;grid-auto-rows:1fr}
 #game #hand .card{height:100%;min-height:154px;box-sizing:border-box}
@@ -360,7 +360,7 @@ main:has(#modeSelect):after{margin-top:24px}
 </main>
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.1.63">v0.1.63</div>
+<div class="version-badge" aria-label="버전 0.1.64">v0.1.64</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.55: 부활 카드 발동 시 이전 체력과 관계없이 HP 30으로 복귀하도록 보장합니다.
@@ -664,16 +664,17 @@ $o('hostStart').addEventListener('click',async()=>{try{if(!onlineRoom||onlineRoo
 function showScreen(id){const current=['modeSelect','rules','setup','onlineSetup','game'].find(k=>{const el=$o(k);return el&& (k==='rules'?!el.classList.contains('hidden'):!el.classList.contains('hidden'))});['modeSelect','rules','setup','onlineSetup','game'].forEach(k=>{const el=$o(k);if(!el)return;if(k==='rules'){if(id==='rules'){el.classList.remove('hidden');el.open=true}else{el.classList.add('hidden');el.open=false}}else el.classList.toggle('hidden',k!==id)});if(current!==id)window.scrollTo({top:0,behavior:'auto'})}
 function escapeHtml(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))}
 function randomAvatar(){const avatars=['🦊','🐱','🐸','🐼','🐰','🐻','🐤','👻','🤖','😈'];return avatars[Math.floor(Math.random()*avatars.length)]}
-let selectedIntroAvatar=localStorage.getItem('izoo-intro-avatar')||'🦊';
+const inviteLinkMode=!!new URLSearchParams(location.search).get('room');
+let selectedIntroAvatar=inviteLinkMode?'🦊':(localStorage.getItem('izoo-intro-avatar')||'🦊');
 $('introAvatarPreview').textContent=selectedIntroAvatar;
 const introAvatarButtons=[...document.querySelectorAll('.intro-avatar')];
-introAvatarButtons.forEach(btn=>{btn.classList.toggle('active',btn.dataset.avatar===selectedIntroAvatar);btn.addEventListener('click',()=>{selectedIntroAvatar=btn.dataset.avatar;$('introAvatarPreview').textContent=selectedIntroAvatar;introAvatarButtons.forEach(b=>b.classList.toggle('active',b.dataset.avatar===selectedIntroAvatar));localStorage.setItem('izoo-intro-avatar',selectedIntroAvatar);playSfx('select')})});
-$('introNick').value=localStorage.getItem('izoo-intro-nick')||'이쥬';
-function syncProfile(){const nick=$('introNick').value.trim().slice(0,16);if(nick){localStorage.setItem('izoo-intro-nick',nick);$('aiNick').value=nick;$('onlineNick').value=nick;sessionStorage.setItem('sudatteolzhu-nick',nick);$('setNickname').textContent='닉네임 설정 완료';$('joinRoom').disabled=false}localStorage.setItem('izoo-intro-avatar',selectedIntroAvatar)}
+introAvatarButtons.forEach(btn=>{btn.classList.toggle('active',btn.dataset.avatar===selectedIntroAvatar);btn.addEventListener('click',()=>{selectedIntroAvatar=btn.dataset.avatar;$('introAvatarPreview').textContent=selectedIntroAvatar;introAvatarButtons.forEach(b=>b.classList.toggle('active',b.dataset.avatar===selectedIntroAvatar));if(!inviteLinkMode)localStorage.setItem('izoo-intro-avatar',selectedIntroAvatar);playSfx('select')})});
+$('introNick').value=inviteLinkMode?'':(localStorage.getItem('izoo-intro-nick')||'이쥬');
+function syncProfile(){const nick=$('introNick').value.trim().slice(0,16);if(nick){localStorage.setItem('izoo-intro-nick',nick);$('aiNick').value=nick;$('onlineNick').value=nick;sessionStorage.setItem('sudatteolzhu-nick',nick);$('setNickname').textContent='닉네임 설정 완료';$('joinRoom').disabled=false}if(!inviteLinkMode)localStorage.setItem('izoo-intro-avatar',selectedIntroAvatar)}
 const profilePanel=document.querySelector('.mode-profile');const profileHome=profilePanel.parentNode;const profileHomeNext=profilePanel.nextElementSibling;function placeProfileForInvite(show){if(!profilePanel)return;if(show){$('onlineSetup').insertBefore(profilePanel,$('nicknameRow'));profilePanel.querySelector('h3').textContent='내 캐릭터 설정';}else if(profilePanel.parentNode!==profileHome){profileHome.insertBefore(profilePanel,profileHomeNext);profilePanel.querySelector('h3').textContent='내 캐릭터 설정';}}
 $('introNick').addEventListener('change',syncProfile);
-$('introNick').addEventListener('input',()=>{const nick=$('introNick').value.trim().slice(0,16);if(nick){$('aiNick').value=nick;$('onlineNick').value=nick;localStorage.setItem('izoo-intro-nick',nick)}});
-syncProfile();
+$('introNick').addEventListener('input',()=>{const nick=$('introNick').value.trim().slice(0,16);if(nick){$('aiNick').value=nick;$('onlineNick').value=nick;if(!inviteLinkMode)localStorage.setItem('izoo-intro-nick',nick)}});
+if(!inviteLinkMode)syncProfile();
 $o('modeAI').addEventListener('click',()=>{aiMode=true;showScreen('setup')});
 $o('modeFriend').addEventListener('click',()=>{aiMode=false;showScreen('onlineSetup');if(!inviteRoomActive){$o('createRoom').classList.remove('hidden');$o('joinCodeLabel').classList.remove('hidden');$o('onlineTitle').textContent='🌐 친구와 온라인으로 플레이';$o('onlineDescription').textContent='방장이 방을 만들고 링크를 공유해. 친구가 대기실에 들어오면 명단에 표시되고, 방장이 플레이를 누르면 모두의 화면에서 게임이 시작돼.';$o('joinRoom').disabled=joiningRoom||!!onlineRoom;}if(!cfg().url||!cfg().key)onlineMsg('저장된 온라인 연결 정보가 없어. 기존에 연결한 사이트나 친구 초대 링크로 접속해 줘.')});
 $o('showRules').addEventListener('click',()=>showScreen('rules'));
