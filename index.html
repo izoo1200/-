@@ -356,7 +356,7 @@ body.double-damage-mode main h1:after,body.double-damage-mode main h2:before{bac
 #dangerTitle{text-shadow:1px 1px 0 rgba(70,20,25,.5)!important}
 @keyframes dangerDialogPulse{from{transform:scale(1)}to{transform:scale(1.008)}}
 
-/* v0.1.82: 온라인 대기실을 게임 로비처럼 재배치 (기존 동작/ID 유지) */
+/* v0.1.83: 온라인 대기실을 게임 로비처럼 재배치 (기존 동작/ID 유지) */
 #onlineSetup:has(#lobby:not(.hidden)){max-width:1120px;margin:0 auto;padding:4px 0 28px}
 #onlineSetup:has(#lobby:not(.hidden))>#friendBack{color:#c7c4d8;margin:0 0 12px}
 #onlineSetup:has(#lobby:not(.hidden))>#onlineTitle{font-size:clamp(1.45rem,3vw,2rem);color:#f5e7d5;margin:0 0 8px}
@@ -383,6 +383,30 @@ body.double-damage-mode main h1:after,body.double-damage-mode main h2:before{bac
 #lobby .lobby-rules summary{color:#f4d8e8}#lobby .lobby-rules .muted{color:#c8c0d0}
 @media(max-width:760px){#lobby.panel{grid-template-columns:minmax(0,1fr);grid-template-areas:'head' 'code' 'invite' 'settings' 'players' 'roster' 'status' 'start' 'rules';padding:14px}#roster{grid-template-columns:repeat(2,minmax(0,1fr))}#lobbyStatus{min-height:80px}#hostStart{justify-self:stretch}}
 @media(max-width:420px){#roster{grid-template-columns:1fr}#lobby>.row:first-of-type{flex-wrap:wrap}#copyInvite{width:100%}}
+
+
+/* v0.1.83: 온라인 대기실 흑백 테마 */
+#onlineSetup:has(#lobby:not(.hidden))>#friendBack{color:#333!important}
+#onlineSetup:has(#lobby:not(.hidden))>#onlineTitle{color:#111!important}
+#onlineSetup:has(#lobby:not(.hidden))>#onlineDescription{color:#555!important}
+#lobby.panel{background:linear-gradient(145deg,#fff 0%,#f1f1f1 70%,#e7e7e7 100%)!important;color:#111!important;border:1px solid #999!important;box-shadow:0 10px 28px rgba(0,0,0,.12)!important}
+#lobby.panel:before{color:#777!important;opacity:.18!important}
+#lobby>#lobbyHeading{color:#111!important;border-bottom-color:#ccc!important}
+#lobby>p:not(#lobbyStatus),#lobby>.row:first-of-type{background:#f7f7f7!important;border-color:#ccc!important;color:#222!important}
+#inviteLink{background:#fff!important;color:#111!important;border-color:#aaa!important}
+#copyInvite{background:#333!important;color:#fff!important;border:1px solid #222!important;border-radius:5px!important}
+#lobbyHandSizeRow{background:#eee!important;border-color:#ccc!important}
+#lobbyHandSizeRow label,#lobby>h4{color:#111!important}
+#lobbyHandSize{background:#fff!important;color:#111!important;border-color:#aaa!important}
+#lobbyHandSizeHint{color:#555!important}
+#roster li{background:linear-gradient(145deg,#fff,#eaeaea)!important;border-color:#bbb!important;color:#111!important;box-shadow:inset 0 1px 0 #fff!important;border-radius:8px!important}
+#roster .kick-player{background:#444!important;border:1px solid #222!important;color:#fff!important;border-radius:5px!important}
+#lobbyStatus{background:#eee!important;border-color:#bbb!important;color:#222!important}
+#hostStart{background:linear-gradient(100deg,#333,#111)!important;color:#fff!important;border:1px solid #000!important;border-radius:7px!important;box-shadow:0 4px 0 #777!important}
+#hostStart:disabled{background:#aaa!important;color:#fff!important;box-shadow:none!important;filter:none!important}
+#lobby>.lobby-rules{color:#222!important;border-top-color:#ccc!important}
+#lobby .lobby-rules summary{color:#111!important}#lobby .lobby-rules .muted{color:#555!important}
+#lobby button:not(#hostStart):not(#copyInvite){background:#eee!important;color:#111!important;border-color:#aaa!important}
 
 </style></head>
 <body><div id="startSequence" class="hidden" role="dialog" aria-modal="true" aria-live="assertive"><div class="start-sequence-card"><div class="start-sequence-kicker">READY?</div><div id="startSequenceNumber" class="start-sequence-number">3</div><div id="startSequenceMessage" class="start-sequence-message">게임을 준비하고 있어!</div></div></div><div id="eventPopup" class="hidden" role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle"><div class="event-card"><div id="eventPopupTitle" class="event-heading">이벤트 발생</div><div id="eventPopupMessage" class="event-message"></div></div></div><main>
@@ -420,7 +444,7 @@ body.double-damage-mode main h1:after,body.double-damage-mode main h2:before{bac
 <div id="dangerBackdrop" class="hidden" role="alertdialog" aria-modal="true" aria-labelledby="dangerTitle"><div id="dangerDialog"><div id="dangerKicker">⚠ 비상 경보 · DAMAGE OVERDRIVE</div><h2 id="dangerTitle">위험해!!!<br>이제부터 데미지가 두 배야!!!</h2><p id="dangerSub">모든 공격과 상태이상 피해 ×2</p></div></div>
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.1.82">v0.1.82</div>
+<div class="version-badge" aria-label="버전 0.1.82">v0.1.83</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
