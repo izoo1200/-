@@ -356,7 +356,7 @@ body.double-damage-mode main h1:after,body.double-damage-mode main h2:before{bac
 #dangerTitle{text-shadow:1px 1px 0 rgba(70,20,25,.5)!important}
 @keyframes dangerDialogPulse{from{transform:scale(1)}to{transform:scale(1.008)}}
 
-/* v0.1.91: 친구 대전 시작 실패 시 오류 표시 및 재시도 가능 */
+/* v0.1.92: 친구 대전 시작 실패 시 오류 표시 및 재시도 가능 */
 #onlineSetup:has(#lobby:not(.hidden)){max-width:1120px;margin:0 auto;padding:4px 0 28px}
 #onlineSetup:has(#lobby:not(.hidden))>#friendBack{color:#c7c4d8;margin:0 0 12px}
 #onlineSetup:has(#lobby:not(.hidden))>#onlineTitle{font-size:clamp(1.45rem,3vw,2rem);color:#f5e7d5;margin:0 0 8px}
@@ -385,7 +385,7 @@ body.double-damage-mode main h1:after,body.double-damage-mode main h2:before{bac
 @media(max-width:420px){#roster{grid-template-columns:1fr}#lobby>.row:first-of-type{flex-wrap:wrap}#copyInvite{width:100%}}
 
 
-/* v0.1.91: 온라인 대기실 흑백 테마 */
+/* v0.1.92: 온라인 대기실 흑백 테마 */
 #onlineSetup:has(#lobby:not(.hidden))>#friendBack{color:#333!important}
 #onlineSetup:has(#lobby:not(.hidden))>#onlineTitle{color:#111!important}
 #onlineSetup:has(#lobby:not(.hidden))>#onlineDescription{color:#555!important}
@@ -436,7 +436,7 @@ body.double-damage-mode main h1:after,body.double-damage-mode main h2:before{bac
 <div id="dangerBackdrop" class="hidden" role="alertdialog" aria-modal="true" aria-labelledby="dangerTitle"><div id="dangerDialog"><div id="dangerKicker">⚠ 비상 경보 · DAMAGE OVERDRIVE</div><h2 id="dangerTitle">위험해!!!<br>이제부터 데미지가 두 배야!!!</h2><p id="dangerSub">모든 공격과 상태이상 피해 ×2</p></div></div>
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.1.87">v0.1.91</div>
+<div class="version-badge" aria-label="버전 0.1.87">v0.1.92</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
@@ -710,8 +710,7 @@ if(onlineObservedActionReady&&incomingActionSignature!==onlineObservedActionSign
  const changedSelection=JSON.stringify(g.selectedIndices||[])!==JSON.stringify(onlineObservedSelectedIndices||[]);
  const changedTurnOrPhase=g.turn!==onlineObservedTurn||g.phase!==onlineObservedPhase||g.attackerId!==onlineObservedAttackerId||g.targetId!==onlineObservedTargetId;
  if(incomingOwner?.remoteId!==localRemoteId){
-  if(changedSelection)playSfx('select');
-  else if(changedTurnOrPhase&&g.phase==='response')playSfx('attackLaunch');
+  if(!changedSelection&&changedTurnOrPhase&&g.phase==='response')playSfx('attackLaunch');
  }
 }
 onlineObservedActionSignature=incomingActionSignature;onlineObservedActionReady=true;onlineObservedSelectedIndices=Array.isArray(g.selectedIndices)?[...g.selectedIndices]:[];onlineObservedTurn=g.turn;onlineObservedPhase=g.phase;onlineObservedAttackerId=g.attackerId;onlineObservedTargetId=g.targetId;
