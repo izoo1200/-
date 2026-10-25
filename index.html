@@ -356,7 +356,7 @@ body.double-damage-mode main h1:after,body.double-damage-mode main h2:before{bac
 #dangerTitle{text-shadow:1px 1px 0 rgba(70,20,25,.5)!important}
 @keyframes dangerDialogPulse{from{transform:scale(1)}to{transform:scale(1.008)}}
 
-/* v0.1.90: 친구 대전 시작 실패 시 오류 표시 및 재시도 가능 */
+/* v0.1.91: 친구 대전 시작 실패 시 오류 표시 및 재시도 가능 */
 #onlineSetup:has(#lobby:not(.hidden)){max-width:1120px;margin:0 auto;padding:4px 0 28px}
 #onlineSetup:has(#lobby:not(.hidden))>#friendBack{color:#c7c4d8;margin:0 0 12px}
 #onlineSetup:has(#lobby:not(.hidden))>#onlineTitle{font-size:clamp(1.45rem,3vw,2rem);color:#f5e7d5;margin:0 0 8px}
@@ -385,7 +385,7 @@ body.double-damage-mode main h1:after,body.double-damage-mode main h2:before{bac
 @media(max-width:420px){#roster{grid-template-columns:1fr}#lobby>.row:first-of-type{flex-wrap:wrap}#copyInvite{width:100%}}
 
 
-/* v0.1.90: 온라인 대기실 흑백 테마 */
+/* v0.1.91: 온라인 대기실 흑백 테마 */
 #onlineSetup:has(#lobby:not(.hidden))>#friendBack{color:#333!important}
 #onlineSetup:has(#lobby:not(.hidden))>#onlineTitle{color:#111!important}
 #onlineSetup:has(#lobby:not(.hidden))>#onlineDescription{color:#555!important}
@@ -436,7 +436,7 @@ body.double-damage-mode main h1:after,body.double-damage-mode main h2:before{bac
 <div id="dangerBackdrop" class="hidden" role="alertdialog" aria-modal="true" aria-labelledby="dangerTitle"><div id="dangerDialog"><div id="dangerKicker">⚠ 비상 경보 · DAMAGE OVERDRIVE</div><h2 id="dangerTitle">위험해!!!<br>이제부터 데미지가 두 배야!!!</h2><p id="dangerSub">모든 공격과 상태이상 피해 ×2</p></div></div>
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.1.87">v0.1.90</div>
+<div class="version-badge" aria-label="버전 0.1.87">v0.1.91</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
@@ -643,13 +643,31 @@ function isSafeSupabaseConfig(url,key){
 }
 function cfg(){if(sessionConfig)return sessionConfig;const c=rawCfg();return isSafeSupabaseConfig(c.url,c.key)?c:{}}
 function initConfig(){const q=new URLSearchParams(location.search);let c=cfg();if(q.get('sburl')&&q.get('sbkey')){if(isSafeSupabaseConfig(q.get('sburl'),q.get('sbkey'))){c={url:q.get('sburl'),key:q.get('sbkey')};sessionConfig=c;if(!rawCfg().url)localStorage.setItem(ONLINE_KEY,JSON.stringify(c))}else onlineMsg('초대 링크의 연결 정보가 안전하지 않아서 무시했어.')}if(q.get('room')){$o('joinCode').value=q.get('room');}}
-function connect(){const c=cfg();if(!c.url||!c.key){const raw=rawCfg();if(raw.url&&raw.key)throw Error('저장된 연결 정보가 안전하지 않아서 쓸 수 없어. 주소는 https://….supabase.co, 키는 공개용(anon/publishable) 키여야 해.');throw Error('저장된 온라인 연결 정보를 찾지 못했어. 기존에 연결했던 사이트에서 열거나, 친구 초대 링크로 접속해 줘.')}if(!window.supabase?.createClient)throw Error('온라인 라이브러리를 불러오지 못했어. 네트워크를 확인해 줘.');sb=window.supabase.createClient(c.url,c.key);return sb}
+function connect(){const c=cfg();if(!c.url||!c.key){const raw=rawCfg();if(raw.url&&raw.key)throw Error('저장된 연결 정보가 안전하지 않아서 쓸 수 없어. 주소는 https://….supabase.co, 키는 공개용(anon/publishable) 키여야 해.');throw Error('저장된 온라인 연결 정보를 찾지 못했어. 기존에 연결했던 사이트에서 열거나, 친구 초대 링크로 접속해 줘.')}if(!window.supabase?.createClient)throw Error('온라인 라이브러리를 불러오지 못했어. 네트워크를 확인해 줘.');sb=window.supabase.createClient(c.url,c.key);authReady=null;return sb}
+// 익명 로그인: 브라우저마다 "이름 없는 로그인"을 만들어서, 서버가 방 참가자만 접근하게 할 수 있어.
+// (Supabase 보안 규칙을 적용하기 전이거나 익명 로그인이 꺼져 있어도 게임은 예전 방식으로 계속 동작해.)
+let authReady=null;
+async function ensureAuth(){
+  if(!sb?.auth)return false;
+  if(authReady)return authReady;
+  authReady=(async()=>{try{const cur=await sb.auth.getSession();if(cur?.data?.session)return true;const r=await sb.auth.signInAnonymously();if(r.error)throw r.error;return true}catch(e){console.warn('익명 로그인을 하지 못했어(보안 규칙을 적용했다면 Supabase에서 익명 로그인을 켜야 해):',e?.message||e);return false}})();
+  const ok=await authReady;if(!ok)authReady=null;return ok;
+}
+// 방 코드로 방 찾기: 새 방식(서버 함수) → 아직 함수가 없으면 예전 방식
+async function findRoomForJoin(code,device){
+  const r=await sb.rpc('lookup_room',{p_code:code,p_device:device});
+  if(!r.error){const row=Array.isArray(r.data)?r.data[0]:r.data;return row?{id:row.id,code:row.room_code,started:!!row.started,playerCount:Number(row.player_count)||0,deviceTaken:!!row.device_taken}:null}
+  if(r.error.code!=='PGRST202'&&!/could not find the function/i.test(r.error.message||''))throw r.error;
+  const q=await sb.from('duel_rooms').select('id,room_code,status,game_state').eq('room_code',code).maybeSingle();if(q.error)throw q.error;if(!q.data)return null;
+  const roster=await sb.from('duel_multi_players').select('player_id,player_state').eq('room_id',q.data.id);if(roster.error)throw roster.error;
+  return {id:q.data.id,code:q.data.room_code,started:!!q.data.game_state?.lobby?.started,playerCount:(roster.data||[]).length,deviceTaken:(roster.data||[]).some(x=>x.player_state?.deviceId===device)};
+}
 function token(){return crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36)}
 function deviceId(){let id=localStorage.getItem(DEVICE_KEY);if(!id){id=token();localStorage.setItem(DEVICE_KEY,id)}return id}
 function makeCode(){return Array.from(crypto.getRandomValues(new Uint8Array(6)),n=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[n%32]).join('')}
 function invite(code){const u=new URL(location.href);u.search='';u.searchParams.set('room',code);const c=cfg();u.searchParams.set('sburl',c.url);u.searchParams.set('sbkey',c.key);return u.toString()}
-async function createOnlineRoom(){try{const n=$o('onlineNick').value.trim().slice(0,16);if(!n){onlineMsg('방을 만들기 전에 닉네임을 입력하고 닉네임 설정을 눌러 줘.');$o('onlineNick').focus();return}if(sessionStorage.getItem('sudatteolzhu-nick')!==n){onlineMsg('먼저 닉네임 설정을 눌러 줘.');return}connect();onlineMsg('방 만드는 중…');const roomToken=token();let data=null,err=null;for(let i=0;i<5;i++){const code=makeCode();const r=await sb.from('duel_rooms').insert({room_code:code,host_token:roomToken,status:'waiting',game_state:{lobby:{started:false,players:[],startAt:null,handSize:5},game:null}}).select('id,room_code').single();if(!r.error){data=r.data;break}err=r.error;if(!String(err.message||'').toLowerCase().includes('duplicate'))break}if(!data)throw err||Error('방을 만들지 못했어.');onlineRoom={id:data.id,code:data.room_code,role:'host',pid:token(),token:roomToken};await addSelf();await showLobby();}catch(e){onlineMsg('방 생성 실패: '+e.message+' (테이블 및 RLS 설정을 확인해 줘.)')}}
-async function joinOnlineRoom(raw){if(joiningRoom||onlineRoom)return;joiningRoom=true;$o('joinRoom').disabled=true;$o('joinRoom').textContent='참가 중…';try{connect();const code=String(raw||'').trim().toUpperCase();if(!/^[A-Z0-9]{6}$/.test(code))throw Error('초대 코드는 영문/숫자 6자리야.');const r=await sb.from('duel_rooms').select('id,room_code,status,game_state').eq('room_code',code).maybeSingle();if(r.error)throw r.error;if(!r.data)throw Error('방을 찾지 못했어.');if(r.data.game_state?.lobby?.started)throw Error('이미 시작한 방이야.');const roster=await sb.from('duel_multi_players').select('player_id,player_state').eq('room_id',r.data.id);if(roster.error)throw roster.error;const thisDevice=deviceId();if((roster.data||[]).some(x=>x.player_state?.deviceId===thisDevice))throw Error('이 컴퓨터는 이미 이 방에 참가했어. 한 컴퓨터에서는 플레이어 한 명만 참가할 수 있어!');if((roster.data||[]).length>=10)throw Error('이 방은 10명으로 가득 찼어.');onlineRoom={id:r.data.id,code:r.data.room_code,role:'guest',pid:token(),token:token()};await addSelf();await showLobby();}catch(e){onlineMsg('방 참가 실패: '+e.message);joiningRoom=false;$o('joinRoom').disabled=false;$o('joinRoom').textContent='방 참가'}}
+async function createOnlineRoom(){try{const n=$o('onlineNick').value.trim().slice(0,16);if(!n){onlineMsg('방을 만들기 전에 닉네임을 입력하고 닉네임 설정을 눌러 줘.');$o('onlineNick').focus();return}if(sessionStorage.getItem('sudatteolzhu-nick')!==n){onlineMsg('먼저 닉네임 설정을 눌러 줘.');return}connect();await ensureAuth();onlineMsg('방 만드는 중…');const roomToken=token();let data=null,err=null;for(let i=0;i<5;i++){const code=makeCode();const r=await sb.from('duel_rooms').insert({room_code:code,host_token:roomToken,status:'waiting',game_state:{lobby:{started:false,players:[],startAt:null,handSize:5},game:null}}).select('id,room_code').single();if(!r.error){data=r.data;break}err=r.error;if(!String(err.message||'').toLowerCase().includes('duplicate'))break}if(!data)throw err||Error('방을 만들지 못했어.');onlineRoom={id:data.id,code:data.room_code,role:'host',pid:token(),token:roomToken};await addSelf();await showLobby();}catch(e){onlineMsg('방 생성 실패: '+e.message+' (테이블 및 RLS 설정을 확인해 줘.)')}}
+async function joinOnlineRoom(raw){if(joiningRoom||onlineRoom)return;joiningRoom=true;$o('joinRoom').disabled=true;$o('joinRoom').textContent='참가 중…';try{connect();await ensureAuth();const code=String(raw||'').trim().toUpperCase();if(!/^[A-Z0-9]{6}$/.test(code))throw Error('초대 코드는 영문/숫자 6자리야.');const thisDevice=deviceId();const found=await findRoomForJoin(code,thisDevice);if(!found)throw Error('방을 찾지 못했어.');if(found.started)throw Error('이미 시작한 방이야.');if(found.deviceTaken)throw Error('이 컴퓨터는 이미 이 방에 참가했어. 한 컴퓨터에서는 플레이어 한 명만 참가할 수 있어!');if(found.playerCount>=10)throw Error('이 방은 10명으로 가득 찼어.');onlineRoom={id:found.id,code:found.code,role:'guest',pid:token(),token:token()};await addSelf();await showLobby();}catch(e){onlineMsg('방 참가 실패: '+e.message+(/row-level security|permission denied/i.test(e.message||'')?' (방 참가 권한이 없어. Supabase에서 익명 로그인이 켜져 있는지 확인해 줘.)':''));joiningRoom=false;$o('joinRoom').disabled=false;$o('joinRoom').textContent='방 참가'}}
 async function addSelf(){const n=$o('onlineNick').value.trim().slice(0,16);if(!n||sessionStorage.getItem('sudatteolzhu-nick')!==n)throw Error('먼저 닉네임을 설정해 줘.');sessionStorage.setItem('sudatteolzhu-nick',n);const chosenAvatar=selectedIntroAvatar||localStorage.getItem('izoo-intro-avatar')||'🦊';localStorage.setItem('izoo-intro-avatar',chosenAvatar);const state={id:onlineRoom.pid,name:n,avatar:chosenAvatar,deviceId:deviceId(),lastSeen:Date.now(),hp:30,maxHp:30,hand:[],alive:true,status:[],permanentDefense:0};const r=await sb.from('duel_multi_players').insert({room_id:onlineRoom.id,player_id:onlineRoom.pid,nick:n,avatar:chosenAvatar,role:onlineRoom.role==='host'?'host':'player',player_state:state});if(r.error)throw r.error;localStorage.setItem(ONLINE_ROOM_KEY,JSON.stringify(onlineRoom))}
 async function showLobby(){showScreen('onlineSetup');$o('onlineSetup').querySelectorAll(':scope > .row, :scope > #connectionSetup').forEach(e=>e.classList.add('hidden'));$o('lobby').classList.remove('hidden');$o('lobbyCode').textContent=onlineRoom.code;$o('lobbyHeading').textContent=onlineRoom.role==='host'?'방장 대기실':'참가자 대기실';$o('inviteLink').value=invite(onlineRoom.code);$o('hostStart').classList.toggle('hidden',onlineRoom.role!=='host');$o('lobbyHandSize').disabled=onlineRoom.role!=='host';$o('lobbyHandSizeHint').textContent=onlineRoom.role==='host'?'게임 시작 전까지 변경할 수 있어.':'방장이 선택한 시작 손패야.';await pollLobby();startPresenceHeartbeat();if(lobbyTimer)clearInterval(lobbyTimer);lobbyTimer=setInterval(()=>pollLobby().catch(e=>onlineMsg('동기화 오류: '+e.message)),1200)}
 function startPresenceHeartbeat(){if(presenceTimer)clearInterval(presenceTimer);presenceTimer=setInterval(async()=>{if(!onlineRoom||!sb||presenceBusy)return;presenceBusy=true;try{const r=await sb.from('duel_multi_players').select('player_state').eq('room_id',onlineRoom.id).eq('player_id',onlineRoom.pid).maybeSingle();if(r.error)throw r.error;if(!r.data){if(onlineRoom.role==='guest'&&!gameStartHandled){onlineMsg('대기실 연결이 끊어졌어. 방에 다시 참가해 줘.');clearInterval(presenceTimer);return}}else{const ps={...(r.data.player_state||{}),lastSeen:Date.now()};const u=await sb.from('duel_multi_players').update({player_state:ps}).eq('room_id',onlineRoom.id).eq('player_id',onlineRoom.pid);if(u.error)throw u.error}}catch(e){console.warn('presence heartbeat failed',e)}finally{presenceBusy=false}},5000)}
@@ -745,7 +763,7 @@ async function markDisconnectedPlayers(state){
    }
    return {...cur,game:{...g,rev:Number(cur.game.rev||0)+1}};
   });
-  if(saved){for(const pid of goneRemote){await sb.from('duel_multi_players').delete().eq('room_id',onlineRoom.id).eq('player_id',pid)}return saved}
+  if(saved)return saved;
  }catch(e){console.warn('disconnect elimination failed',e)}finally{disconnectCheckBusy=false}
  return state;
 }
@@ -838,7 +856,7 @@ async function resumeOnlineRoom(){
   const btn=$o('resumeOnline'),status=$o('resumeOnlineStatus');btn.disabled=true;btn.textContent='이어오는 중…';status.textContent='온라인 방과 게임 상태를 확인하고 있어.';
   try{
     const saved=JSON.parse(localStorage.getItem(ONLINE_ROOM_KEY)||'null');if(!saved?.id||!saved?.pid)throw Error('이어갈 온라인 게임 정보가 없어.');
-    connect();onlineRoom=saved;
+    connect();await ensureAuth();onlineRoom=saved;
     const roomResult=await sb.from('duel_rooms').select('id,room_code,status,game_state').eq('id',saved.id).maybeSingle();if(roomResult.error)throw roomResult.error;if(!roomResult.data)throw Error('방이 이미 종료됐거나 삭제됐어.');
     const roomData=roomResult.data,state={...(roomData.game_state||{})},lobby=state.lobby||{},game=state.game;
     const snap=(()=>{try{return JSON.parse(localStorage.getItem(ONLINE_RESUME_PLAYER_KEY)||'null')}catch(e){return null}})();
