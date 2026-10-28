@@ -463,12 +463,21 @@ body.impact-shake main{animation:impactScreenShake .24s ease-out}
 .exp-opponent-section #expOpponentCount{margin-left:0}
 
 
-/* v0.3.16 — 접속자 표시 문구 간소화 */
+/* v0.3.18 — 접속자 표시 문구 간소화 */
 .game-brand{position:relative}
 #sitePresence{position:absolute;right:0;top:-2px;display:flex;align-items:center;justify-content:center;gap:7px;margin:0;padding:6px 10px;width:max-content;max-width:48%;border:1px solid #ddd;background:#fff;color:#333;font-size:.78rem;font-weight:750}
 #sitePresence .presence-dot{width:7px;height:7px;border-radius:50%;background:#aaa;flex:none}
 #sitePresence.is-live .presence-dot{background:#20a464;box-shadow:0 0 0 3px rgba(32,164,100,.12)}
 #sitePresenceCount{font-variant-numeric:tabular-nums}
+
+/* v0.3.18: 효과음 슬라이더의 0%/100% 끝점 정렬 및 모든 화면에 적용 */
+#soundSettingsPanel label{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#soundSettingsPanel input#soundVolume{display:block;box-sizing:border-box;flex:1 1 160px;min-width:0;width:calc(100% + 16px);height:24px;margin:0 -8px;padding:0;border:0;background:transparent;accent-color:#171717;appearance:none;-webkit-appearance:none}
+#soundSettingsPanel input#soundVolume::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:#d4d4d4}
+#soundSettingsPanel input#soundVolume::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-top:-5px;border:0;border-radius:50%;background:#171717}
+#soundSettingsPanel input#soundVolume::-moz-range-track{height:6px;border-radius:99px;background:#d4d4d4}
+#soundSettingsPanel input#soundVolume::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:#171717}
+
 </style>
 <style>
 /* v0.2.38: 최대 체력 증가 카드는 힐 카드의 초록색 테두리로 표시 */
@@ -730,7 +739,7 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
 
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.3.16">v0.3.16</div>
+<div class="version-badge" aria-label="버전 0.3.18">v0.3.18</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
@@ -784,7 +793,7 @@ function stopGameAndAudio(){
   announcementWaiters.splice(0).forEach(resolve=>resolve());
   if(sfxContext){const ctx=sfxContext;sfxContext=null;try{ctx.close()}catch(e){}}
 }
-function toggleSoundSettings(){const panel=$('soundSettingsPanel');panel.classList.toggle('hidden');if(!panel.classList.contains('hidden'))$('soundVolume').focus()}
+function toggleSoundSettings(){const panel=$('soundSettingsPanel');if(!panel)return;if(panel.parentElement!==document.body){document.body.appendChild(panel);panel.dataset.globalPanel='1'}const opening=panel.classList.contains('hidden');panel.classList.toggle('hidden',!opening);if(opening){Object.assign(panel.style,{position:'fixed',left:'50%',top:'50%',transform:'translate(-50%,-50%)',width:'min(760px, calc(100vw - 28px))',maxWidth:'760px',margin:'0',zIndex:'10020',boxShadow:'0 12px 50px rgba(0,0,0,.22)',maxHeight:'calc(100dvh - 32px)',overflowY:'auto'});$('soundVolume').focus()}else{Object.assign(panel.style,{position:'',left:'',top:'',transform:'',width:'',maxWidth:'',margin:'',zIndex:'',boxShadow:'',maxHeight:'',overflowY:''})}}
 const CARD_DEFS=[
 {id:'atk1',name:'공격 3',rarity:'common',kind:'attack',damage:3},{id:'atk2',name:'공격 4',rarity:'common',kind:'attack',damage:4},{id:'atk5',name:'공격 6',rarity:'common',kind:'attack',damage:6},{id:'atk8',name:'공격 8',rarity:'rare',kind:'attack',damage:8},{id:'atk10',name:'공격 10',rarity:'rare',kind:'attack',damage:10},
 {id:'counter2',name:'반격 2',rarity:'common',kind:'counter',value:2},{id:'counter4',name:'반격 4',rarity:'common',kind:'counter',value:4},{id:'counter6',name:'반격 6',rarity:'common',kind:'counter',value:6},{id:'heal10',name:'회복 10',rarity:'common',kind:'heal',value:10},{id:'heal20',name:'회복 20',rarity:'rare',kind:'heal',value:20},{id:'maxhp',name:'최대 체력 +10',rarity:'epic',kind:'maxhp',value:10},
@@ -810,7 +819,7 @@ function log(s){logLines.unshift(s)}
 let announcements=[],announcementHistory=[],announcementExpanded=false,announcementQueue=[],announcementShowing=false,announcementTimer=null,eventPopupTimer=null;
 let finalWinnerAnnounced=false;
 function syncAnnouncementInputLock(){const game=$('game');const locked=!!(announcementShowing||announcementQueue.length);if(game)game.classList.toggle('announcement-input-locked',locked);if(!locked){document.querySelectorAll('#hand .card').forEach(el=>{if(el.style.pointerEvents==='none')el.style.opacity='.5';else el.style.opacity=el.getAttribute('aria-disabled')==='true'?'.4':'1';});}}
-document.addEventListener('click',e=>{if(!(announcementShowing||announcementQueue.length))return;const el=e.target.closest('button,.card,select,input,[role=button]');if(!el||!$('game')?.contains(el))return;if(['announcements','gameBack','soundSettingsGame'].includes(el.id))return;e.preventDefault();e.stopImmediatePropagation();},true);
+document.addEventListener('click',e=>{if(!(announcementShowing||announcementQueue.length))return;const el=e.target.closest('button,.card,select,input,[role=button]');if(!el||!$('game')?.contains(el))return;if(['announcements','gameBack','soundSettingsGame'].includes(el.id)||el.classList.contains('open-card-dex-context'))return;e.preventDefault();e.stopImmediatePropagation();},true);
 let onlineEventNotice=null, onlineLastEventId='';
 let doubleDamageEventActive=false, roundNumber=1, doubleDamageAlertShown=false, dangerAlarmNodes=[], doubleCardSpawnedThisGame=false;
 function announce(s,duration=2200){const isEvent=/이벤트 발생/.test(s);if(isEvent){if(s.includes('운석'))playSfx('eventMeteor');else if(s.includes('회복'))playSfx('eventHeal');else if(s.includes('역풍'))playSfx('eventRebound');else if(s.includes('손패 교체'))playSfx('eventSwap');else if(s.includes('각성'))playSfx('success')}else if(/승리|우승|대결이 시작됩니다/.test(s))playSfx('success');else if(/탈락|쓰러졌습니다|체력이 0/.test(s))playSfx('status');announcementQueue.push({text:s,duration,isEvent});if(!announcementShowing)showNextAnnouncement()}
