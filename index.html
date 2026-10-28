@@ -463,7 +463,7 @@ body.impact-shake main{animation:impactScreenShake .24s ease-out}
 .exp-opponent-section #expOpponentCount{margin-left:0}
 
 
-/* v0.3.14 — 실시간 사이트 접속자 표시를 헤더 오른쪽 상단으로 이동 */
+/* v0.3.16 — 접속자 표시 문구 간소화 */
 .game-brand{position:relative}
 #sitePresence{position:absolute;right:0;top:-2px;display:flex;align-items:center;justify-content:center;gap:7px;margin:0;padding:6px 10px;width:max-content;max-width:48%;border:1px solid #ddd;background:#fff;color:#333;font-size:.78rem;font-weight:750}
 #sitePresence .presence-dot{width:7px;height:7px;border-radius:50%;background:#aaa;flex:none}
@@ -688,7 +688,7 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
   </div>
 </div>
 <main>
-<header class="game-brand"><div id="sitePresence" aria-live="polite"><span class="presence-dot" aria-hidden="true"></span><span>전체 사이트 접속자</span><strong id="sitePresenceCount">집계 중…</strong></div><div class="brand-mark">IZOO <span>GAME LAB</span></div><div class="brand-title"><h1>이쥬의 게임 테스트</h1><p>PLAY · READ · REACT</p></div><div class="brand-credit">CREATED BY <strong>IZOO</strong></div></header>
+<header class="game-brand"><div id="sitePresence" aria-live="polite"><span class="presence-dot" aria-hidden="true"></span><span>접속자</span><strong id="sitePresenceCount">집계 중…</strong></div><div class="brand-mark">IZOO <span>GAME LAB</span></div><div class="brand-title"><h1>이쥬의 게임 테스트</h1><p>PLAY · READ · REACT</p></div><div class="brand-credit">CREATED BY <strong>IZOO</strong></div></header>
 <section class="screen" id="modeSelect"><div class="intro-sound-row"><button id="soundSettingsMain" type="button">🔊 효과음 설정</button></div><div id="soundSettingsPanel" class="sound-settings hidden" role="region" aria-label="효과음 설정" style="max-width:760px;margin:0 auto 48px"><div class="row" style="justify-content:space-between"><b>🔊 효과음 설정</b><button id="soundSettingsClose" type="button" aria-label="설정 닫기">닫기 ✕</button></div><label for="soundVolume" style="margin-top:10px">효과음 크기 <input id="soundVolume" type="range" min="0" max="100" step="5" value="70"><span id="soundVolumeLabel">70%</span></label><button id="soundTest" type="button" style="margin-top:10px">효과음 테스트</button></div><div class="row" style="justify-content:center;margin:0 0 8px"><button id="openAiCredits" type="button">이 게임은 AI를 이용하여 만든 게임입니다.</button></div><h2 style="margin-top:0">대전 방식 선택</h2>
 <div class="mode-buttons"><button id="modeAI">개인 대전</button><button id="modeFriend">친구 대전</button><button id="modeExperiment" type="button"><span>실험 대전</span><small>카드 · 체력 · 상태 · 연출 테스트</small><b>RECOMMENDED</b></button></div><div class="row" style="justify-content:center;gap:10px;margin-top:10px"><button id="openCardDex" type="button">🃏 카드 도감</button><button id="resumeOnline" class="hidden" type="button">온라인 게임 이어하기</button></div><p id="resumeOnlineStatus" class="muted" style="text-align:center" aria-live="polite"></p><div class="mode-profile panel" style="margin:22px 0 18px"><h3>내 캐릭터 설정</h3><div class="row" style="align-items:center;gap:18px"><div id="introAvatarPreview" class="intro-avatar-preview" style="padding:0;min-width:70px">🦊</div><div style="flex:1;min-width:220px"><label for="introNick">닉네임</label><input id="introNick" class="intro-name" maxlength="16" placeholder="닉네임을 입력해 줘" autocomplete="nickname" value="이쥬"></div></div><div class="intro-avatars" id="introAvatars" aria-label="아바타 선택" style="margin-top:14px;max-width:480px">
 <button type="button" class="intro-avatar active" data-avatar="🦊" aria-label="여우">🦊</button><button type="button" class="intro-avatar" data-avatar="🐱" aria-label="고양이">🐱</button><button type="button" class="intro-avatar" data-avatar="🐸" aria-label="개구리">🐸</button><button type="button" class="intro-avatar" data-avatar="🐼" aria-label="판다">🐼</button><button type="button" class="intro-avatar" data-avatar="🐰" aria-label="토끼">🐰</button><button type="button" class="intro-avatar" data-avatar="🐻" aria-label="곰">🐻</button><button type="button" class="intro-avatar" data-avatar="🐤" aria-label="병아리">🐤</button><button type="button" class="intro-avatar" data-avatar="👻" aria-label="유령">👻</button><button type="button" class="intro-avatar" data-avatar="🤖" aria-label="로봇">🤖</button><button type="button" class="intro-avatar" data-avatar="😈" aria-label="악마">😈</button></div></div><div class="screen-footer"><button id="showRules" class="back" type="button" onclick="showScreen('rules')">게임 규칙 보기</button></div></section>
@@ -730,7 +730,7 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
 
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.3.15">v0.3.15</div>
+<div class="version-badge" aria-label="버전 0.3.16">v0.3.16</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
@@ -1379,7 +1379,7 @@ initConfig();updateResumeButton();
   client=window.supabase.createClient(cfgNow.url,cfgNow.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
   const presenceKey=(window.crypto?.randomUUID?.()||('tab-'+Date.now()+'-'+Math.random().toString(36).slice(2)));
   channel=client.channel('izoo-site-wide-presence',{config:{presence:{key:presenceKey}}});
-  const update=()=>{try{const state=channel.presenceState();let total=0;for(const key of Object.keys(state))total+=Array.isArray(state[key])?state[key].length:1;setStatus(total+'명 접속 중',true)}catch{setStatus('연결 중…')}};
+  const update=()=>{try{const state=channel.presenceState();let total=0;for(const key of Object.keys(state))total+=Array.isArray(state[key])?state[key].length:1;setStatus(total+'명',true)}catch{setStatus('연결 중…')}};
   channel.on('presence',{event:'sync'},update).subscribe(status=>{
    if(status==='SUBSCRIBED'){channel.track({online:true,seenAt:Date.now()});update();heartbeatTimer=setInterval(()=>{if(channel)channel.track({online:true,seenAt:Date.now()})},25000)}
    else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED')setStatus('집계 연결 실패');
