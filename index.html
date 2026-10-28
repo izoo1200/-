@@ -730,7 +730,7 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
 
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.3.27">v0.3.27</div>
+<div class="version-badge" aria-label="버전 0.3.29">v0.3.29</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
@@ -2097,3 +2097,16 @@ main{background:#fff!important;filter:none!important;}
 </style>
 
 <style>/* v0.3.27: 예측 성공 시 대응 카드 효과를 발동하지 않음 */</style>
+
+<style>/* v0.3.28: 모든 특수 카드가 손패에서도 도감과 동일하게 보라색으로 표시 */
+#game #hand .card.card-type-special, #hand .card.card-type-special { background:#f3e8ff!important; border:2px solid #9333ea!important; color:#581c87!important; }
+#game #hand .card.card-type-special.selected, #hand .card.card-type-special.selected { background:#e9d5ff!important; border-color:#7e22ce!important; box-shadow:0 0 0 2px rgba(147,51,234,.25)!important; }
+</style>
+
+<style>/* v0.3.29: PC 게임 화면은 800px 고정 너비, 최소 높이 1000px. 알림/내용이 늘어나면 높이만 자동 확장 */
+@media (min-width:1100px){
+  body:has(#game:not(.hidden)){padding-left:0!important;padding-right:0!important;}
+  body:has(#game:not(.hidden)) main{width:800px!important;max-width:800px!important;min-width:800px!important;min-height:1000px!important;height:auto!important;overflow:visible!important;margin-left:auto!important;margin-right:auto!important;}
+  body:has(#game:not(.hidden)) #game{width:100%!important;min-width:0!important;min-height:0!important;height:auto!important;overflow:visible!important;}
+}
+</style>
