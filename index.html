@@ -730,7 +730,7 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
 
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.3.22">v0.3.22</div>
+<div class="version-badge" aria-label="버전 0.3.23">v0.3.23</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
@@ -2045,4 +2045,13 @@ main{background:#fff!important;filter:none!important;}
 /* v0.3.10: 헤더와 효과음 설정 버튼 사이의 불필요한 상단 여백 제거 */
 #modeSelect.screen{padding-top:0!important}
 #modeSelect .intro-sound-row{margin-top:0!important}
+</style>
+
+<style>
+/* v0.3.23: 모바일 플레이어 칸을 2열 그리드로 확대 */
+@media(max-width:600px){
+  #game .players{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;align-items:stretch!important;}
+  #game .players>.player{flex:none!important;width:auto!important;min-width:0!important;max-width:100%!important;aspect-ratio:1/1!important;padding:6px!important;}
+  #game .players>.player.active{flex:none!important;width:auto!important;min-width:0!important;}
+}
 </style>
