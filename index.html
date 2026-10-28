@@ -248,7 +248,7 @@ main .card.card-type-special.selected{background:#e9d5ff!important;box-shadow:0 
 /* v0.1.12 — 메인 화면 정돈 + 게임명/제작자 복구 */
 body{background:#f5f5f3;color:#20201f;padding:clamp(14px,3vw,34px) 16px;font-family:Arial,"Apple SD Gothic Neo",sans-serif}
 main{max-width:960px;margin:0 auto;background:#fff;border:1px solid #e2e0dc;padding:clamp(20px,4vw,42px);min-height:calc(100vh - 48px);display:flex;flex-direction:column}
-.game-brand{display:grid;grid-template-columns:1fr minmax(0,2fr) 1fr;align-items:center;gap:16px;padding:4px 0 24px;border-bottom:1px solid #e5e3df;margin-bottom:30px}
+.game-brand{display:grid;grid-template-columns:1fr minmax(0,2fr) 1fr;align-items:center;gap:16px;padding:4px 0 14px;border-bottom:1px solid #e5e3df;margin-bottom:14px}
 .brand-mark{font-size:13px;font-weight:950;letter-spacing:.12em;color:#252525}.brand-mark span{display:block;font-size:9px;letter-spacing:.22em;color:#888;margin-top:5px}
 .brand-title{text-align:center}.brand-title h1{font-size:clamp(1.55rem,4vw,2.55rem);letter-spacing:-.055em;line-height:1.1;margin:0;font-weight:900}.brand-title p{font-size:9px;font-weight:800;letter-spacing:.22em;color:#8a8882;margin:9px 0 0}
 .brand-credit{text-align:right;font-size:9px;letter-spacing:.14em;color:#85837e}.brand-credit strong{display:block;color:#222;font-size:12px;letter-spacing:.12em;margin-top:5px}
@@ -259,7 +259,7 @@ main{max-width:960px;margin:0 auto;background:#fff;border:1px solid #e2e0dc;padd
 #joinRoom{background:#171717!important;color:#fff!important;border:1px solid #171717!important;font-weight:800;opacity:1!important}
 #joinRoom:hover:not(:disabled){background:#333!important;transform:translateY(-1px)}
 #joinRoom:disabled{background:#777!important;color:#fff!important;border-color:#777!important;opacity:1!important}
-@media(max-width:620px){main{padding:20px;min-height:calc(100vh - 28px)}.game-brand{grid-template-columns:1fr auto;gap:10px;padding-bottom:18px;margin-bottom:24px}.brand-title{grid-column:1/-1;grid-row:1;text-align:left}.brand-mark{grid-column:1;grid-row:2}.brand-credit{grid-column:2;grid-row:2}.mode-buttons button{min-height:125px;padding:18px}.mode-buttons button:before{margin-bottom:28px}.mode-profile.panel{padding:18px}.intro-avatars{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:620px){main{padding:20px;min-height:calc(100vh - 28px)}.game-brand{grid-template-columns:1fr auto;gap:10px;padding-bottom:12px;margin-bottom:12px}.brand-title{grid-column:1/-1;grid-row:1;text-align:left}.brand-mark{grid-column:1;grid-row:2}.brand-credit{grid-column:2;grid-row:2}.mode-buttons button{min-height:125px;padding:18px}.mode-buttons button:before{margin-bottom:28px}.mode-profile.panel{padding:18px}.intro-avatars{grid-template-columns:repeat(5,minmax(0,1fr))}}
 
 .announcement-input-locked .players,.announcement-input-locked .cards,.announcement-input-locked #targetWrap,.announcement-input-locked #submit,.announcement-input-locked #pass{pointer-events:none}.announcement-input-locked #submit,.announcement-input-locked #pass{opacity:.45}
 .announcement-input-locked #hand .card{opacity:.5!important}
@@ -678,9 +678,9 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
 </div>
 <main>
 <header class="game-brand"><div class="brand-mark">IZOO <span>GAME LAB</span></div><div class="brand-title"><h1>이쥬의 게임 테스트</h1><p>PLAY · READ · REACT</p></div><div class="brand-credit">CREATED BY <strong>IZOO</strong></div></header>
-<section class="screen" id="modeSelect"><div class="row" style="justify-content:flex-end;margin-bottom:12px"><button id="soundSettingsMain" type="button">🔊 효과음 설정</button></div><div class="row" style="justify-content:center;margin:0"><button id="openAiCredits" type="button">이 게임은 AI를 이용하여 만든 게임입니다.</button></div><h2 style="margin-top:0">대전 방식 선택</h2>
+<section class="screen" id="modeSelect"><div class="intro-sound-row"><button id="soundSettingsMain" type="button">🔊 효과음 설정</button></div><div id="soundSettingsPanel" class="sound-settings hidden" role="region" aria-label="효과음 설정" style="max-width:760px;margin:0 auto 48px"><div class="row" style="justify-content:space-between"><b>🔊 효과음 설정</b><button id="soundSettingsClose" type="button" aria-label="설정 닫기">닫기 ✕</button></div><label for="soundVolume" style="margin-top:10px">효과음 크기 <input id="soundVolume" type="range" min="0" max="100" step="5" value="70"><span id="soundVolumeLabel">70%</span></label><button id="soundTest" type="button" style="margin-top:10px">효과음 테스트</button></div><div class="row" style="justify-content:center;margin:0 0 8px"><button id="openAiCredits" type="button">이 게임은 AI를 이용하여 만든 게임입니다.</button></div><h2 style="margin-top:0">대전 방식 선택</h2>
 <div class="mode-buttons"><button id="modeAI">개인 대전</button><button id="modeFriend">친구 대전</button><button id="modeExperiment" type="button"><span>실험 대전</span><small>카드 · 체력 · 상태 · 연출 테스트</small><b>RECOMMENDED</b></button></div><div class="row" style="justify-content:center;gap:10px;margin-top:10px"><button id="openCardDex" type="button">🃏 카드 도감</button><button id="resumeOnline" class="hidden" type="button">온라인 게임 이어하기</button></div><p id="resumeOnlineStatus" class="muted" style="text-align:center" aria-live="polite"></p><div class="mode-profile panel" style="margin:22px 0 18px"><h3>내 캐릭터 설정</h3><div class="row" style="align-items:center;gap:18px"><div id="introAvatarPreview" class="intro-avatar-preview" style="padding:0;min-width:70px">🦊</div><div style="flex:1;min-width:220px"><label for="introNick">닉네임</label><input id="introNick" class="intro-name" maxlength="16" placeholder="닉네임을 입력해 줘" autocomplete="nickname" value="이쥬"></div></div><div class="intro-avatars" id="introAvatars" aria-label="아바타 선택" style="margin-top:14px;max-width:480px">
-<button type="button" class="intro-avatar active" data-avatar="🦊" aria-label="여우">🦊</button><button type="button" class="intro-avatar" data-avatar="🐱" aria-label="고양이">🐱</button><button type="button" class="intro-avatar" data-avatar="🐸" aria-label="개구리">🐸</button><button type="button" class="intro-avatar" data-avatar="🐼" aria-label="판다">🐼</button><button type="button" class="intro-avatar" data-avatar="🐰" aria-label="토끼">🐰</button><button type="button" class="intro-avatar" data-avatar="🐻" aria-label="곰">🐻</button><button type="button" class="intro-avatar" data-avatar="🐤" aria-label="병아리">🐤</button><button type="button" class="intro-avatar" data-avatar="👻" aria-label="유령">👻</button><button type="button" class="intro-avatar" data-avatar="🤖" aria-label="로봇">🤖</button><button type="button" class="intro-avatar" data-avatar="😈" aria-label="악마">😈</button></div></div><div class="screen-footer"><button id="showRules" class="back">게임 규칙 보기</button></div></section>
+<button type="button" class="intro-avatar active" data-avatar="🦊" aria-label="여우">🦊</button><button type="button" class="intro-avatar" data-avatar="🐱" aria-label="고양이">🐱</button><button type="button" class="intro-avatar" data-avatar="🐸" aria-label="개구리">🐸</button><button type="button" class="intro-avatar" data-avatar="🐼" aria-label="판다">🐼</button><button type="button" class="intro-avatar" data-avatar="🐰" aria-label="토끼">🐰</button><button type="button" class="intro-avatar" data-avatar="🐻" aria-label="곰">🐻</button><button type="button" class="intro-avatar" data-avatar="🐤" aria-label="병아리">🐤</button><button type="button" class="intro-avatar" data-avatar="👻" aria-label="유령">👻</button><button type="button" class="intro-avatar" data-avatar="🤖" aria-label="로봇">🤖</button><button type="button" class="intro-avatar" data-avatar="😈" aria-label="악마">😈</button></div></div><div class="screen-footer"><button id="showRules" class="back" type="button" onclick="showScreen('rules')">게임 규칙 보기</button></div></section>
 <section class="screen hidden" id="cardDex">
 <button id="cardDexBack" class="back" type="button">← 돌아가기</button>
 <h2>🃏 카드 도감</h2><p class="muted">게임에 등장하는 카드와 효과를 한눈에 확인할 수 있어.</p>
@@ -713,13 +713,13 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
 <div class="panel"><h3 id="phaseTitle">행동</h3><p id="instruction"></p><div class="cards" id="hand"></div><div class="row" id="turnControlsRow" style="margin-top:12px"><label id="targetWrap">대상 <select id="target"></select></label><label id="predictionWrap" class="hidden">예측 <select id="prediction"><option value="counter">반격</option><option value="heal">회복</option><option value="special">특수</option></select></label><button id="submit">선택 완료</button><button id="discardCard" type="button">선택 카드 버리기</button><button id="pass" class="hidden">응답하지 않기</button></div></div>
 <div id="winnerBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="winnerName"><div id="winnerDialog"><div class="winner-kicker">GAME OVER</div><div class="winner-trophy" aria-hidden="true">🏆</div><div id="winnerAvatar" aria-hidden="true">🦊</div><h2 id="winnerName">승리자</h2><p id="winnerCaption">마지막까지 살아남았어!</p><button id="winnerClose" type="button">확인</button></div></div><div class="rematch-backdrop hidden" id="rematchBackdrop"><div class="panel rematch-dialog" id="rematchPanel" role="dialog" aria-modal="true" aria-labelledby="rematchTitle"><h3 id="rematchTitle">한 판 더 할까?</h3><p id="rematchStatus" class="muted">친구들과 다시 할지 골라 줘!</p><div class="row"><button id="rematchYes" type="button">🔁 한 판 더 하기</button></div></div></div><div class="panel hidden" id="chatPanel"><h3>실시간 채팅</h3><div id="chatMessages" class="chat-messages" aria-live="polite"><div class="muted">아직 채팅이 없어. 먼저 인사해 봐!</div></div><form id="chatForm" class="row"><input id="chatInput" maxlength="300" placeholder="메시지 입력…" aria-label="채팅 메시지" style="flex:1;min-width:180px"><button id="chatSend" type="submit">전송</button></form></div>
 </section>
-<div id="soundSettingsPanel" class="sound-settings hidden" role="region" aria-label="효과음 설정" style="max-width:760px;margin:0 auto 48px"><div class="row" style="justify-content:space-between"><b>🔊 효과음 설정</b><button id="soundSettingsClose" type="button" aria-label="설정 닫기">닫기 ✕</button></div><label for="soundVolume" style="margin-top:10px">효과음 크기 <input id="soundVolume" type="range" min="0" max="100" step="5" value="70"><span id="soundVolumeLabel">70%</span></label><p class="muted" style="margin:8px 0 0">브금 없이 효과음만 조절해. 0%로 설정하면 음소거돼.</p><button id="soundTest" type="button" style="margin-top:10px">효과음 테스트</button></div>
+
 </main>
 <div id="dangerBackdrop" class="hidden" role="alertdialog" aria-modal="true" aria-labelledby="dangerTitle"><div id="dangerDialog"><div id="dangerKicker">⚠ 비상 경보 · DAMAGE OVERDRIVE</div><h2 id="dangerTitle">위험해!!!<br>이제부터 데미지가 두 배야!!!</h2><p id="dangerSub">모든 공격과 상태이상 피해 ×2</p></div></div>
 
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.3.4">v0.3.5</div>
+<div class="version-badge" aria-label="버전 0.3.10">v0.3.10</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
@@ -1926,3 +1926,27 @@ main{background:#fff!important;filter:none!important;}
 /* v0.2.132: 모든 대전 모드의 동귀어진 폭탄·폭발 이펙트를 대폭 확대 */
 /* v0.2.135: 동귀어진 폭탄·폭발을 플레이어 칸 안에서 실제로 크게 보이도록 크기와 애니메이션 스케일 수정 */
 /* v0.3.5: 안내 팝업 여백 축소 및 핵심 문구 강조 */</style>
+
+<style>
+/* v0.3.9: 효과음 설정 안내 문구 제거 */
+.game-brand{padding-bottom:5px!important;margin-bottom:3px!important}
+#modeSelect .intro-sound-row{display:flex;justify-content:flex-end;align-items:center;width:100%;margin:0 0 5px;position:relative;z-index:2}
+#modeSelect #soundSettingsMain{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:7px 12px;line-height:1.2;white-space:nowrap;margin:0;flex:0 0 auto}
+#modeSelect #soundSettingsPanel{box-sizing:border-box;width:100%;max-width:760px;margin:0 auto 10px!important;padding:12px;position:relative;clear:both}
+#modeSelect #soundSettingsPanel .row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0}
+#modeSelect #soundSettingsPanel label{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:10px;width:100%}
+#modeSelect #soundSettingsPanel input#soundVolume{display:block;box-sizing:border-box;width:100%;min-width:0;height:24px;margin:0;padding:0;border:0;background:transparent;accent-color:#171717;flex:none}
+#modeSelect #soundSettingsPanel input#soundVolume::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:#d4d4d4}
+#modeSelect #soundSettingsPanel input#soundVolume::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-top:-5px;border:0;border-radius:50%;background:#171717}
+#modeSelect #soundSettingsPanel input#soundVolume::-moz-range-track{height:6px;border-radius:99px;background:#d4d4d4}
+#modeSelect #soundSettingsPanel input#soundVolume::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:#171717}
+#modeSelect #soundSettingsPanel p{margin:8px 0 0;line-height:1.45}
+#modeSelect #soundSettingsPanel #soundTest{margin-top:10px}
+@media(max-width:600px){#modeSelect .intro-sound-row{margin-bottom:4px}#modeSelect #soundSettingsMain{font-size:13px;padding:7px 10px}#modeSelect #soundSettingsPanel{padding:10px}#modeSelect #soundSettingsPanel label{grid-template-columns:1fr auto;gap:6px}#modeSelect #soundSettingsPanel input#soundVolume{grid-column:1/-1;grid-row:2}}
+</style>
+
+<style>
+/* v0.3.10: 헤더와 효과음 설정 버튼 사이의 불필요한 상단 여백 제거 */
+#modeSelect.screen{padding-top:0!important}
+#modeSelect .intro-sound-row{margin-top:0!important}
+</style>
