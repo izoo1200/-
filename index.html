@@ -730,7 +730,7 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
 
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.3.29">v0.3.29</div>
+<div class="version-badge" aria-label="버전 0.3.29">v0.3.30</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
@@ -1083,8 +1083,10 @@ function aiRespond(){
   if(gameOver||!target?.isAI||phase!=='response')return;
   const incomingDamage=pendingAttacks.reduce((n,c)=>n+(c.kind==='attack'?(Number(c.damage)||0):c.kind==='double'?Math.max(0,attacker?.hp||0)*2:0),0)*(doubleDamageEventActive?2:1);
   const hasAttack=pendingAttacks.some(c=>['attack','status','double','steal','swap'].includes(c.kind));
+  // 대응 단계에서 UI가 금지하는 공격/상태 카드가 봇 선택 후보에 들어가던 버그 수정.
+  // 사람 플레이어와 동일하게 부활·공격·상태 카드는 대응 카드로 선택할 수 없다.
   const options=target.hand.map((c,i)=>({c,i,score:(()=>{
-    if(c.kind==='revive')return -100;
+    if(c.kind==='revive'||c.kind==='attack'||c.kind==='status')return -100;
     let score=0;
     if(c.kind==='angel')score+=hasAttack?40:8;
     if(c.kind==='counter')score+=incomingDamage>0?22+(Number(c.value)||0)*2:3;
@@ -1097,7 +1099,7 @@ function aiRespond(){
     if(c.kind==='swap')score+=attacker&&attacker.hp>target.hp?12:0;
     if(c.kind==='double')score+=target.hp<=8&&attacker?.hp>target.hp?12:0;
     return score;
-  })()})).filter(x=>x.c.kind!=='revive').sort((a,b)=>b.score-a.score);
+  })()})).filter(x=>!['revive','attack','status'].includes(x.c.kind)).sort((a,b)=>b.score-a.score);
   // Spend a response card only when it protects against a real threat or gives useful value.
   const best=options[0];
   const use=best&&best.score>=10&&!(best.c.kind==='counter'&&incomingDamage<=0);
@@ -2103,7 +2105,7 @@ main{background:#fff!important;filter:none!important;}
 #game #hand .card.card-type-special.selected, #hand .card.card-type-special.selected { background:#e9d5ff!important; border-color:#7e22ce!important; box-shadow:0 0 0 2px rgba(147,51,234,.25)!important; }
 </style>
 
-<style>/* v0.3.29: PC 게임 화면은 800px 고정 너비, 최소 높이 1000px. 알림/내용이 늘어나면 높이만 자동 확장 */
+<style>/* v0.3.30: PC 게임 화면은 800px 고정 너비, 최소 높이 1000px. 알림/내용이 늘어나면 높이만 자동 확장 */
 @media (min-width:1100px){
   body:has(#game:not(.hidden)){padding-left:0!important;padding-right:0!important;}
   body:has(#game:not(.hidden)) main{width:800px!important;max-width:800px!important;min-width:800px!important;min-height:1000px!important;height:auto!important;overflow:visible!important;margin-left:auto!important;margin-right:auto!important;}
