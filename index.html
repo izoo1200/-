@@ -730,7 +730,7 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
 
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.3.24">v0.3.24</div>
+<div class="version-badge" aria-label="버전 0.3.25">v0.3.25</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
@@ -2059,3 +2059,16 @@ main{background:#fff!important;filter:none!important;}
 </style>
 
 <style>/* v0.3.24: 친구 대전 종료 후 대기실 복귀, 방 코드 자동 대문자 */</style>
+
+<style>
+/* v0.3.25: 모바일 대전 화면에서 플레이어 아바타와 텍스트를 보기 쉽게 확대 */
+@media(max-width:600px){
+  #game .players>.player{padding:10px 6px!important;gap:3px!important;aspect-ratio:1/1!important;}
+  #game .players>.player .player-avatar,
+  #game .players>.player .avatar{font-size:clamp(30px,8vw,42px)!important;line-height:1.05!important;margin:2px 0 3px!important;}
+  #game .players>.player .player-name{font-size:clamp(14px,3.8vw,17px)!important;line-height:1.12!important;font-weight:900!important;margin:2px 0!important;}
+  #game .players>.player .hp{font-size:clamp(14px,3.7vw,17px)!important;line-height:1.12!important;margin:1px 0!important;}
+  #game .players>.player>div:not(.player-avatar):not(.avatar):not(.hp){font-size:clamp(10px,2.8vw,12px)!important;line-height:1.1!important;margin-top:2px!important;}
+  #game .players>.player:before{font-size:9px!important;margin-bottom:4px!important;}
+}
+</style>
