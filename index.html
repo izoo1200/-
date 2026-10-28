@@ -259,7 +259,7 @@ main{max-width:960px;margin:0 auto;background:#fff;border:1px solid #e2e0dc;padd
 #joinRoom{background:#171717!important;color:#fff!important;border:1px solid #171717!important;font-weight:800;opacity:1!important}
 #joinRoom:hover:not(:disabled){background:#333!important;transform:translateY(-1px)}
 #joinRoom:disabled{background:#777!important;color:#fff!important;border-color:#777!important;opacity:1!important}
-@media(max-width:620px){main{padding:20px;min-height:calc(100vh - 28px)}.game-brand{grid-template-columns:1fr auto;gap:10px;padding-bottom:12px;margin-bottom:12px}.brand-title{grid-column:1/-1;grid-row:1;text-align:left}.brand-mark{grid-column:1;grid-row:2}.brand-credit{grid-column:2;grid-row:2}.mode-buttons button{min-height:125px;padding:18px}.mode-buttons button:before{margin-bottom:28px}.mode-profile.panel{padding:18px}.intro-avatars{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:620px){#sitePresence{top:0;right:0;font-size:.65rem;padding:4px 6px;gap:5px;max-width:58%}#sitePresence>span:nth-child(2){display:none}.game-brand .brand-title{padding-top:24px}main{padding:20px;min-height:calc(100vh - 28px)}.game-brand{grid-template-columns:1fr auto;gap:10px;padding-bottom:12px;margin-bottom:12px}.brand-title{grid-column:1/-1;grid-row:1;text-align:left}.brand-mark{grid-column:1;grid-row:2}.brand-credit{grid-column:2;grid-row:2}.mode-buttons button{min-height:125px;padding:18px}.mode-buttons button:before{margin-bottom:28px}.mode-profile.panel{padding:18px}.intro-avatars{grid-template-columns:repeat(5,minmax(0,1fr))}}
 
 .announcement-input-locked .players,.announcement-input-locked .cards,.announcement-input-locked #targetWrap,.announcement-input-locked #submit,.announcement-input-locked #pass{pointer-events:none}.announcement-input-locked #submit,.announcement-input-locked #pass{opacity:.45}
 .announcement-input-locked #hand .card{opacity:.5!important}
@@ -462,6 +462,13 @@ body.impact-shake main{animation:impactScreenShake .24s ease-out}
 .exp-opponent-section .row{gap:12px}
 .exp-opponent-section #expOpponentCount{margin-left:0}
 
+
+/* v0.3.14 — 실시간 사이트 접속자 표시를 헤더 오른쪽 상단으로 이동 */
+.game-brand{position:relative}
+#sitePresence{position:absolute;right:0;top:-2px;display:flex;align-items:center;justify-content:center;gap:7px;margin:0;padding:6px 10px;width:max-content;max-width:48%;border:1px solid #ddd;background:#fff;color:#333;font-size:.78rem;font-weight:750}
+#sitePresence .presence-dot{width:7px;height:7px;border-radius:50%;background:#aaa;flex:none}
+#sitePresence.is-live .presence-dot{background:#20a464;box-shadow:0 0 0 3px rgba(32,164,100,.12)}
+#sitePresenceCount{font-variant-numeric:tabular-nums}
 </style>
 <style>
 /* v0.2.38: 최대 체력 증가 카드는 힐 카드의 초록색 테두리로 표시 */
@@ -656,8 +663,12 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
 #aiCreditsDialog button:focus-visible{outline:2px solid #111;outline-offset:3px}
 @media(max-width:520px){#aiCreditsDialog{padding:18px}#aiCreditsDialog h2{font-size:1.25rem}}
 </style>
+<style>#singleTabLock{position:fixed;inset:0;z-index:20000;background:rgba(255,255,255,.97);display:none;align-items:center;justify-content:center;padding:24px;text-align:center}#singleTabLock.active{display:flex}#singleTabLock .lock-card{max-width:420px;border:1px solid #ddd;padding:28px;background:#fff}#singleTabLock h2{font-size:1.25rem;margin:0 0 12px}#singleTabLock p{color:#666;line-height:1.7;margin:0}</style>
 </head>
-<body><div id="startSequence" class="hidden" role="dialog" aria-modal="true" aria-live="assertive"><div class="start-sequence-card"><div class="start-sequence-kicker">READY?</div><div id="startSequenceNumber" class="start-sequence-number">3</div><div id="startSequenceMessage" class="start-sequence-message">게임을 준비하고 있어!</div></div></div><div id="eventPopup" class="hidden" role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle"><div class="event-card"><div id="eventPopupTitle" class="event-heading">이벤트 발생</div><div id="eventPopupMessage" class="event-message"></div></div></div>
+<body><div id="singleTabLock" role="alertdialog" aria-modal="true" aria-labelledby="singleTabLockTitle"><div class="lock-card"><h2 id="singleTabLockTitle">이미 다른 탭에서 열려 있어요</h2><p>이 브라우저에서는 게임 사이트를 한 탭에서만 사용할 수 있어요.<br>다른 탭을 닫고 이 페이지를 새로고침해 주세요.</p></div></div><script>
+// v0.3.15: 같은 브라우저 프로필에서 한 탭만 사이트를 사용하도록 잠급니다.
+(function(){const KEY='izoo-single-site-tab-lock-v1',TTL=7000,tabId=window.crypto?.randomUUID?.()||('tab-'+Date.now()+'-'+Math.random().toString(36).slice(2));const overlay=document.getElementById('singleTabLock');let timer=null;function read(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch{return null}}function setBlocked(v){window.__izooSingleTabBlocked=v;overlay?.classList.toggle('active',v);if(v&&timer){clearInterval(timer);timer=null}}function check(){const cur=read();if(cur&&cur.id!==tabId&&cur.expires>Date.now()){setBlocked(true);return}setBlocked(false);try{localStorage.setItem(KEY,JSON.stringify({id:tabId,expires:Date.now()+TTL}))}catch{}}const cur=read();if(cur&&cur.id!==tabId&&cur.expires>Date.now())setBlocked(true);else{setBlocked(false);try{localStorage.setItem(KEY,JSON.stringify({id:tabId,expires:Date.now()+TTL}))}catch{}}timer=setInterval(check,2000);window.addEventListener('storage',e=>{if(e.key===KEY)check()});window.addEventListener('pagehide',()=>{const c=read();if(c?.id===tabId)try{localStorage.removeItem(KEY)}catch{}if(timer)clearInterval(timer)});window.addEventListener('pageshow',check)})();
+</script><div id="startSequence" class="hidden" role="dialog" aria-modal="true" aria-live="assertive"><div class="start-sequence-card"><div class="start-sequence-kicker">READY?</div><div id="startSequenceNumber" class="start-sequence-number">3</div><div id="startSequenceMessage" class="start-sequence-message">게임을 준비하고 있어!</div></div></div><div id="eventPopup" class="hidden" role="dialog" aria-modal="true" aria-labelledby="eventPopupTitle"><div class="event-card"><div id="eventPopupTitle" class="event-heading">이벤트 발생</div><div id="eventPopupMessage" class="event-message"></div></div></div>
 <div id="aiCreditsBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="aiCreditsTitle" aria-describedby="aiCreditsIntro">
   <div id="aiCreditsDialog" tabindex="-1">
     <h2 id="aiCreditsTitle">AI와 함께 만든 게임</h2>
@@ -677,7 +688,7 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
   </div>
 </div>
 <main>
-<header class="game-brand"><div class="brand-mark">IZOO <span>GAME LAB</span></div><div class="brand-title"><h1>이쥬의 게임 테스트</h1><p>PLAY · READ · REACT</p></div><div class="brand-credit">CREATED BY <strong>IZOO</strong></div></header>
+<header class="game-brand"><div id="sitePresence" aria-live="polite"><span class="presence-dot" aria-hidden="true"></span><span>전체 사이트 접속자</span><strong id="sitePresenceCount">집계 중…</strong></div><div class="brand-mark">IZOO <span>GAME LAB</span></div><div class="brand-title"><h1>이쥬의 게임 테스트</h1><p>PLAY · READ · REACT</p></div><div class="brand-credit">CREATED BY <strong>IZOO</strong></div></header>
 <section class="screen" id="modeSelect"><div class="intro-sound-row"><button id="soundSettingsMain" type="button">🔊 효과음 설정</button></div><div id="soundSettingsPanel" class="sound-settings hidden" role="region" aria-label="효과음 설정" style="max-width:760px;margin:0 auto 48px"><div class="row" style="justify-content:space-between"><b>🔊 효과음 설정</b><button id="soundSettingsClose" type="button" aria-label="설정 닫기">닫기 ✕</button></div><label for="soundVolume" style="margin-top:10px">효과음 크기 <input id="soundVolume" type="range" min="0" max="100" step="5" value="70"><span id="soundVolumeLabel">70%</span></label><button id="soundTest" type="button" style="margin-top:10px">효과음 테스트</button></div><div class="row" style="justify-content:center;margin:0 0 8px"><button id="openAiCredits" type="button">이 게임은 AI를 이용하여 만든 게임입니다.</button></div><h2 style="margin-top:0">대전 방식 선택</h2>
 <div class="mode-buttons"><button id="modeAI">개인 대전</button><button id="modeFriend">친구 대전</button><button id="modeExperiment" type="button"><span>실험 대전</span><small>카드 · 체력 · 상태 · 연출 테스트</small><b>RECOMMENDED</b></button></div><div class="row" style="justify-content:center;gap:10px;margin-top:10px"><button id="openCardDex" type="button">🃏 카드 도감</button><button id="resumeOnline" class="hidden" type="button">온라인 게임 이어하기</button></div><p id="resumeOnlineStatus" class="muted" style="text-align:center" aria-live="polite"></p><div class="mode-profile panel" style="margin:22px 0 18px"><h3>내 캐릭터 설정</h3><div class="row" style="align-items:center;gap:18px"><div id="introAvatarPreview" class="intro-avatar-preview" style="padding:0;min-width:70px">🦊</div><div style="flex:1;min-width:220px"><label for="introNick">닉네임</label><input id="introNick" class="intro-name" maxlength="16" placeholder="닉네임을 입력해 줘" autocomplete="nickname" value="이쥬"></div></div><div class="intro-avatars" id="introAvatars" aria-label="아바타 선택" style="margin-top:14px;max-width:480px">
 <button type="button" class="intro-avatar active" data-avatar="🦊" aria-label="여우">🦊</button><button type="button" class="intro-avatar" data-avatar="🐱" aria-label="고양이">🐱</button><button type="button" class="intro-avatar" data-avatar="🐸" aria-label="개구리">🐸</button><button type="button" class="intro-avatar" data-avatar="🐼" aria-label="판다">🐼</button><button type="button" class="intro-avatar" data-avatar="🐰" aria-label="토끼">🐰</button><button type="button" class="intro-avatar" data-avatar="🐻" aria-label="곰">🐻</button><button type="button" class="intro-avatar" data-avatar="🐤" aria-label="병아리">🐤</button><button type="button" class="intro-avatar" data-avatar="👻" aria-label="유령">👻</button><button type="button" class="intro-avatar" data-avatar="🤖" aria-label="로봇">🤖</button><button type="button" class="intro-avatar" data-avatar="😈" aria-label="악마">😈</button></div></div><div class="screen-footer"><button id="showRules" class="back" type="button" onclick="showScreen('rules')">게임 규칙 보기</button></div></section>
@@ -719,7 +730,7 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
 
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.3.11">v0.3.11</div>
+<div class="version-badge" aria-label="버전 0.3.15">v0.3.15</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 손패에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
@@ -1356,6 +1367,27 @@ $o('resumeOnline').addEventListener('click',resumeOnlineRoom);
 // 탭/앱으로 돌아오면 바로 접속 신호를 갱신해서 억울하게 퇴장 처리되는 일을 줄입니다.
 document.addEventListener('visibilitychange',async()=>{if(document.visibilityState!=='visible'||!onlineRoom||!sb)return;try{const r=await sb.from('duel_multi_players').select('player_state').eq('room_id',onlineRoom.id).eq('player_id',onlineRoom.pid).maybeSingle();if(r.data)await sb.from('duel_multi_players').update({player_state:{...(r.data.player_state||{}),lastSeen:Date.now()}}).eq('room_id',onlineRoom.id).eq('player_id',onlineRoom.pid)}catch(e){}});
 initConfig();updateResumeButton();
+// 공통 Supabase Presence 채널로 사이트 전체의 실시간 접속 탭 수를 집계합니다.
+(function initSitePresence(){
+ const box=document.getElementById('sitePresence'),count=document.getElementById('sitePresenceCount');
+ if(!box||!count||window.__izooSingleTabBlocked)return;
+ let client=null,channel=null,heartbeatTimer=null;
+ const setStatus=(text,live=false)=>{count.textContent=text;box.classList.toggle('is-live',live)};
+ const cfgNow=cfg();
+ if(!cfgNow.url||!cfgNow.key||!window.supabase?.createClient){setStatus('온라인 연결 후 집계');return;}
+ try{
+  client=window.supabase.createClient(cfgNow.url,cfgNow.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  const presenceKey=(window.crypto?.randomUUID?.()||('tab-'+Date.now()+'-'+Math.random().toString(36).slice(2)));
+  channel=client.channel('izoo-site-wide-presence',{config:{presence:{key:presenceKey}}});
+  const update=()=>{try{const state=channel.presenceState();let total=0;for(const key of Object.keys(state))total+=Array.isArray(state[key])?state[key].length:1;setStatus(total+'명 접속 중',true)}catch{setStatus('연결 중…')}};
+  channel.on('presence',{event:'sync'},update).subscribe(status=>{
+   if(status==='SUBSCRIBED'){channel.track({online:true,seenAt:Date.now()});update();heartbeatTimer=setInterval(()=>{if(channel)channel.track({online:true,seenAt:Date.now()})},25000)}
+   else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED')setStatus('집계 연결 실패');
+  });
+  const leave=()=>{if(heartbeatTimer)clearInterval(heartbeatTimer);try{channel?.untrack()}catch(e){}};
+  window.addEventListener('pagehide',leave,{once:true});
+ }catch(e){setStatus('집계 연결 실패')}
+})();
 // Fixed invite-link screen: nickname setup, join room, and return home only. Joining is always manual.
 const inviteRoomCode=new URLSearchParams(location.search).get('room');
 inviteRoomActive=!!inviteRoomCode;
@@ -1504,6 +1536,20 @@ main{box-sizing:border-box;min-width:0;width:100%;}
   position:relative!important;z-index:2!important;
 }
 </style>
+
+<style>
+/* v0.3.12: 모바일 손패 글자 가독성 개선, 플레이어 칸 글자 미세 조정 */
+@media(max-width:600px){
+  #game #hand.cards{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;align-items:stretch!important}
+  #game #hand .card{min-height:138px!important;height:auto!important;max-height:none!important;padding:10px 9px!important;font-size: .95rem!important;line-height:1.35!important;overflow:visible!important}
+  #game #hand .card b{font-size:1rem!important;line-height:1.3!important}
+  #game #hand .card small{font-size:.88rem!important;line-height:1.4!important;word-break:normal!important;overflow-wrap:anywhere!important}
+  #game .player .player-name{font-size:clamp(9.5px,2.75vw,13.5px)!important}
+  #game .player .hp{font-size:clamp(10.5px,2.85vw,13.5px)!important}
+  #game .player>div:not(.player-avatar):not(.avatar):not(.hp){font-size:clamp(7.5px,2.1vw,10.5px)!important}
+}
+</style>
+
 </body></html>
 
 <style>
