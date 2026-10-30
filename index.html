@@ -731,7 +731,7 @@ main{width:min(800px,100%);max-width:800px;box-sizing:border-box}
 
 <div id="stealCardBackdrop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="stealCardTitle"><div id="stealCardDialog"><h2 id="stealCardTitle">카드를 훔쳐오고 있습니다…</h2><p id="stealCardPrompt">훔쳐 올 카드를 선택해 줘.</p><div id="stealCardChoices"></div></div></div>
 <div class="game-mini-credit" aria-label="이쥬의 게임 테스트, 제작자 이쥬">이쥬의 게임 테스트<strong>CREATED BY IZOO</strong></div>
-<div class="version-badge" aria-label="버전 0.3.63">v0.3.63</div>
+<div class="version-badge" aria-label="버전 0.3.64">v0.3.64</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // v0.1.72: 부활 카드는 카드에 남아 자리를 차지하며 공격/대응 선택에서 제외됩니다.
@@ -794,7 +794,7 @@ const CARD_DEFS=[
 let onlineSharedSelected=[];
 let players=[],order=[],turn=0,phase='attack',attacker=null,target=null,selected=[],timer=null,displayTimer=null,timerDeadline=0,seconds=30,logLines=[],seen={},pendingAttacks=[],responseState={},gameOver=false,roundDamage={},aiMode=false,aiTimer=null,resolvingDuel=false,actionLocked=false,predictionChoice='attack',predictionResult=null,aiTargetHistory=[];
 const $=id=>document.getElementById(id);
-$('soundSettingsMain').addEventListener('click',toggleSoundSettings);$('soundSettingsGame').addEventListener('click',toggleSoundSettings);$('soundSettingsClose').addEventListener('click',()=>$('soundSettingsPanel').classList.add('hidden'));$('soundVolume').addEventListener('input',e=>{sfxVolume=Number(e.target.value)/100;$('soundVolumeLabel').textContent=e.target.value+'%'});$('soundTest').addEventListener('click',()=>playSfx('eventHeal'));
+$('soundSettingsMain').addEventListener('click',toggleSoundSettings);$('soundSettingsGame').addEventListener('click',toggleSoundSettings);$('soundSettingsClose').addEventListener('click',()=>$('soundSettingsPanel').classList.add('hidden'));function updateSoundVolumeSlider(){const slider=$('soundVolume');if(!slider)return;const value=Math.max(0,Math.min(100,Number(slider.value)||0));slider.style.setProperty('--volume-fill',value+'%');$('soundVolumeLabel').textContent=value+'%';sfxVolume=value/100}updateSoundVolumeSlider();$('soundVolume').addEventListener('input',updateSoundVolumeSlider);$('soundTest').addEventListener('click',()=>playSfx('eventHeal'));
 
 // 이벤트 알림은 자동으로 사라지지 않으며, 사용자가 직접 클릭하면 닫힘
 $('eventPopup').addEventListener('click',()=>{
@@ -1632,7 +1632,34 @@ main{box-sizing:border-box;min-width:0;width:100%;}
 }
 </style>
 
-</body></html>
+<style>
+
+/* v0.3.64: 효과음 슬라이더는 설정 패널이 body로 이동해도 동일한 스타일을 유지하고 양 끝까지 표시 */
+#soundSettingsPanel input#soundVolume{
+  -webkit-appearance:none!important;appearance:none!important;
+  display:block;box-sizing:border-box;width:calc(100% + 16px)!important;
+  min-width:0;height:24px;margin:0 0 0 -8px!important;padding:0!important;
+  border:0!important;background:transparent!important;flex:none;
+  --volume-fill:70%;
+}
+#soundSettingsPanel input#soundVolume::-webkit-slider-runnable-track{
+  height:6px;border-radius:99px;
+  background:linear-gradient(to right,#171717 0%,#171717 var(--volume-fill),#d4d4d4 var(--volume-fill),#d4d4d4 100%);
+}
+#soundSettingsPanel input#soundVolume::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:16px;height:16px;
+  margin-top:-5px;border:0;border-radius:50%;background:#171717;
+}
+#soundSettingsPanel input#soundVolume::-moz-range-track{
+  height:6px;border-radius:99px;background:#d4d4d4;
+}
+#soundSettingsPanel input#soundVolume::-moz-range-progress{
+  height:6px;border-radius:99px;background:#171717;
+}
+#soundSettingsPanel input#soundVolume::-moz-range-thumb{
+  width:16px;height:16px;border:0;border-radius:50%;background:#171717;
+}
+</style>\n</body></html>
 
 <style>
 /* v0.2.59: 게임 화면 가로 폭을 1000px 기준으로 설정 */
